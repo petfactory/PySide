@@ -25,9 +25,9 @@ class Example(QtGui.QWidget):
         self.model = QtGui.QStandardItemModel()
 
         # tree view
-        self.view = QtGui.QTreeView()
-        self.view.setModel(self.model)
-        self.layout.addWidget(self.view)
+        self.tree_view = QtGui.QTreeView()
+        self.tree_view.setModel(self.model)
+        self.layout.addWidget(self.tree_view)
 
         # button
         print_btn = QtGui.QPushButton('Print')
@@ -37,6 +37,10 @@ class Example(QtGui.QWidget):
         add_btn = QtGui.QPushButton('Add')
         self.layout.addWidget(add_btn)
         add_btn.clicked.connect(self.add_btn_clicked) 
+
+        remove_btn = QtGui.QPushButton('Remove')
+        self.layout.addWidget(remove_btn)
+        remove_btn.clicked.connect(self.remove_btn_clicked) 
 
         d = 'ABCDEFG'
 
@@ -60,8 +64,32 @@ class Example(QtGui.QWidget):
 
     
     def add_btn_clicked(self):
-        sender = self.sender()
-        print(sender)
+        #sender = self.sender()
+
+        if(self.tree_view.selectionModel().hasSelection()):
+            for index in self.tree_view.selectedIndexes():
+                item = self.model.itemFromIndex(index)
+                item.appendRow(QtGui.QStandardItem('ITEM'))
+
+        else:
+            print('adding to root')
+            item = self.model.invisibleRootItem()
+            item.appendRow(QtGui.QStandardItem('ROOT'))
+
+
+
+    def remove_btn_clicked(self):
+
+        if(self.tree_view.selectionModel().hasSelection()):
+
+            for index in self.tree_view.selectedIndexes():
+
+                row = index.row()
+                item = self.model.itemFromIndex(index)
+                parent = item.parent()
+
+                parent_index = self.model.indexFromItem(parent)
+                self.model.removeRow(row, parent_index)
 
 
     def print_btn_clicked(self):
