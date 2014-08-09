@@ -6,7 +6,7 @@ from PySide import QtGui, QtCore
 import pprint
 import json
 
-# extend QTreeView to make the treeview deselct when clicked off item
+# extend QTreeView to make the treeview deselect when clicked outside the items
 class DeselectableTreeView(QtGui.QTreeView):
     def mousePressEvent(self, event):
         self.clearSelection()
@@ -37,7 +37,8 @@ class Example(QtGui.QWidget):
         self.tree_view = DeselectableTreeView()
         self.tree_view.setModel(self.model)
         self.layout.addWidget(self.tree_view)
-        #self.tree_view.clicked.connect(self.tree_view_clicked)
+        # enable internal drag and drop
+        self.tree_view.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
 
         # button
         print_btn = QtGui.QPushButton('Print')
@@ -123,7 +124,6 @@ class Example(QtGui.QWidget):
             print('adding to root')
             item = self.model.invisibleRootItem()
             item.appendRow(QtGui.QStandardItem('ROOT'))
-
 
 
     def remove_btn_clicked(self):
