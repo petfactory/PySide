@@ -4,6 +4,13 @@
 import sys
 from PySide import QtGui, QtCore
 import pprint
+import json
+
+# extend QTreeView to make the treeview deselct when clicked off item
+class DeselectableTreeView(QtGui.QTreeView):
+    def mousePressEvent(self, event):
+        self.clearSelection()
+        QtGui.QTreeView.mousePressEvent(self, event)
 
 class Example(QtGui.QWidget):
     
@@ -25,9 +32,12 @@ class Example(QtGui.QWidget):
         self.model = QtGui.QStandardItemModel()
 
         # tree view
-        self.tree_view = QtGui.QTreeView()
+        #self.tree_view = QtGui.QTreeView()
+        # use my custom treeview class
+        self.tree_view = DeselectableTreeView()
         self.tree_view.setModel(self.model)
         self.layout.addWidget(self.tree_view)
+        #self.tree_view.clicked.connect(self.tree_view_clicked)
 
         # button
         print_btn = QtGui.QPushButton('Print')
@@ -40,31 +50,69 @@ class Example(QtGui.QWidget):
 
         remove_btn = QtGui.QPushButton('Remove')
         self.layout.addWidget(remove_btn)
-        remove_btn.clicked.connect(self.remove_btn_clicked) 
+        remove_btn.clicked.connect(self.remove_btn_clicked)
 
-        d = 'ABCDEFG'
+        open_btn = QtGui.QPushButton('Open')
+        self.layout.addWidget(open_btn)
+        open_btn.clicked.connect(self.open_btn_clicked)
 
-        # create some items to store in the model
-        items = []
-        for i in range(3):
-            item_1 = QtGui.QStandardItem('{0}_{1}'.format(d[i], i))
-            items.append(item_1)
-            
-            for j in range (i):
-                item_2 = QtGui.QStandardItem('{0}_{1}{2}'.format(d[i],i,j))
-                item_1.appendRow(item_2)
+        save_btn = QtGui.QPushButton('Save')
+        self.layout.addWidget(save_btn)
+        save_btn.clicked.connect(self.save_btn_clicked) 
 
-                for k in range (i):
-                    item_2.appendRow(QtGui.QStandardItem('{0}_{1}{2}{3}'.format(d[i],i,j,k)))
-
-        self.model.appendColumn(items)
-
-        #pprint.pprint(items)
         self.show()
 
-    
+    def populate_model(self, dir_dict):
+        
+        if len(dir_dict) < 1:
+            print('no items in dict')
+            return
+
+        def recurse_item(dir_dict, parent_list):
+
+            for dir_name, sub_dir in sorted(dir_dict.iteritems()):
+
+                item = QtGui.QStandardItem(str(dir_name))
+                parent_list[-1].appendRow(item)
+
+                if isinstance(sub_dir, dict):
+                    parent_list.append(item)
+                    recurse_item(sub_dir, parent_list)
+
+                elif isinstance(sub_dir, list):
+                    pass
+
+            if len(parent_list) > 1:
+                parent_list.pop()
+       
+        parent = self.model.invisibleRootItem()
+        recurse_item(dir_dict, [parent])
+
+    def open_btn_clicked(self):
+        fname, _ = QtGui.QFileDialog.getOpenFileName(self, caption='Open file', directory='/home', filter='*.json')
+
+        if(fname):
+            f = open(fname, 'r')
+            data = f.read()
+            self.populate_model(json.loads(data))
+
+
+    def save_btn_clicked(self):
+        fname, _ = QtGui.QFileDialog.getSaveFileName(self, caption='Save a file', directory='/home', filter='*.json')
+
+        if(fname):
+            item = self.model.invisibleRootItem()
+            ret_dict = {}
+            self.recurse(item, -1, ret_dict)
+            data = json.dumps(ret_dict, indent=4)
+
+            f = open(fname,'w')
+            f.write(data) # python will convert \n to os.linesep
+            f.close() # you can omit in most cases as the destructor will call if
+
+
+
     def add_btn_clicked(self):
-        #sender = self.sender()
 
         if(self.tree_view.selectionModel().hasSelection()):
             for index in self.tree_view.selectedIndexes():
@@ -96,7 +144,7 @@ class Example(QtGui.QWidget):
         item = self.model.invisibleRootItem()
         ret_dict = {}
         self.recurse(item, -1, ret_dict)
-        #pprint.pprint(ret_dict)
+        pprint.pprint(ret_dict)
 
     def recurse(self, item, depth, ret_dict):
 
@@ -123,6 +171,8 @@ def main():
     
     app = QtGui.QApplication(sys.argv)
     ex = Example()
+    #ex.populate_model({u'A': {u'A 1': {u'A 1 1': []}},u'B': {u'B 1': {u'B 1 1': {u'B 1 1 1': []}}},u'C': {u'C 1': {u'C 1 1': []}}})
+    ex.populate_model({})
     sys.exit(app.exec_())
 
 
