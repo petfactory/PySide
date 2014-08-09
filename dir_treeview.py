@@ -59,7 +59,11 @@ class Example(QtGui.QWidget):
 
         save_btn = QtGui.QPushButton('Save')
         self.layout.addWidget(save_btn)
-        save_btn.clicked.connect(self.save_btn_clicked) 
+        save_btn.clicked.connect(self.save_btn_clicked)
+
+        dir_btn = QtGui.QPushButton('root dir')
+        self.layout.addWidget(dir_btn)
+        dir_btn.clicked.connect(self.dir_btn_clicked) 
 
         self.show()
 
@@ -88,6 +92,10 @@ class Example(QtGui.QWidget):
        
         parent = self.model.invisibleRootItem()
         recurse_item(dir_dict, [parent])
+
+    def dir_btn_clicked(self):
+        selected_directory = QtGui.QFileDialog.getExistingDirectory()
+        print(selected_directory)
 
     def open_btn_clicked(self):
         fname, _ = QtGui.QFileDialog.getOpenFileName(self, caption='Open file', directory='/home', filter='*.json')
