@@ -163,6 +163,7 @@ class MyModel(QtCore.QAbstractTableModel):
 
 
     # optional method implementations ---------------------------
+
     def setData(self, index, value, role=QtCore.Qt.EditRole):
 
     	if role == QtCore.Qt.EditRole:
@@ -194,6 +195,17 @@ class MyModel(QtCore.QAbstractTableModel):
         else:
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled |  QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
 
+    def insertRows(self, position, rows, parent=QtCore.QModelIndex()):
+    	''' this will insert empty rows'''
+
+    	self.beginInsertRows(QtCore.QModelIndex(), position, position + rows - 1)
+
+    	for i in range(rows):
+    		self._items.insert(position, MyItem('', 0, 0, ''))
+
+    	self.endInsertRows()
+
+    	return True
 
 class MyTable(QtGui.QWidget):
     
@@ -231,9 +243,17 @@ class MyTable(QtGui.QWidget):
         tableview.update()
 
         btn = QtGui.QPushButton("OK")
+        btn.clicked.connect(self.add_item)
         vbox.addWidget(btn)
 
         self.show()
+
+    def add_item(self):
+    	#item = MyItem('camera3', 45, 110, 'notes 3')
+    	num_rows = self.model.rowCount(QtCore.QModelIndex())
+    	self.model.insertRows(num_rows, 1, QtCore.QModelIndex())
+
+    	#self.model._items.append
 
         
 def main():
