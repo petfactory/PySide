@@ -207,6 +207,19 @@ class MyModel(QtCore.QAbstractTableModel):
 
         return True
 
+    def removeRows(self, position, rows, parent=QtCore.QModelIndex()):
+        ''' this will insert empty rows'''
+
+        self.beginRemoveRows(QtCore.QModelIndex(), position, position + rows - 1)
+
+        for i in range(rows):
+            item = self._items[position]
+            self._items.remove(item)
+
+        self.endRemoveRows()
+
+        return True
+
     def append_item(self, item, parent=QtCore.QModelIndex()):
         ''' this will append an item'''
 
@@ -222,7 +235,7 @@ class MyTable(QtGui.QWidget):
     def __init__(self):
         super(MyTable, self).__init__()
                 
-        self.setGeometry(200, 200, 250, 350)
+        self.setGeometry(20, 100, 500, 350)
         self.setWindowTitle('Test')
 
         vbox = QtGui.QVBoxLayout()
@@ -235,35 +248,66 @@ class MyTable(QtGui.QWidget):
 
         self.model = MyModel(data)
 
-        tableview = MyTableView()
-        tableview.setModel(self.model)
-        tableview.setDragEnabled(True)
-        tableview.setAcceptDrops(True)
-        tableview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
-        tableview.setAlternatingRowColors(True)
-        tableview.setItemDelegate(MyDelegate(tableview))
+        self.tableview = MyTableView()
+        self.tableview.setModel(self.model)
+        self.tableview.setDragEnabled(True)
+        self.tableview.setAcceptDrops(True)
+        self.tableview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.tableview.setAlternatingRowColors(True)
+        self.tableview.setItemDelegate(MyDelegate(self.tableview))
 
-        tableview.update()
-        vbox.addWidget(tableview)
+        self.tableview.update()
+        vbox.addWidget(self.tableview)
 
+        '''
         btn = QtGui.QPushButton("OK")
         btn.clicked.connect(self.add_item)
         vbox.addWidget(btn)
+        '''
+
+        add_remove_hbox = QtGui.QHBoxLayout()
+        vbox.addLayout(add_remove_hbox)
+
+        remove_btn = QtGui.QPushButton(" + ")
+        remove_btn.clicked.connect(self.add_btn_clicked)
+        add_remove_hbox.addWidget(remove_btn)
+
+        remove_btn = QtGui.QPushButton(" - ")
+        remove_btn.clicked.connect(self.remove_btn_clicked)
+        add_remove_hbox.addWidget(remove_btn)
+
+        add_remove_hbox.addStretch()
 
         self.show()
 
+    '''
     def add_item(self):
         item = MyItem('new camera', 45, 110, 'bal bala asa')
         self.model.append_item(item)
+    '''
+
+    def add_btn_clicked(self):
+        item = MyItem('new camera', 45, 110, 'bal bala asa')
+        self.model.append_item(item)
+
+    def remove_btn_clicked(self):
+        selection_model = self.tableview.selectionModel()
+        selected_rows = selection_model.selectedRows()
+
+        row_list = [sel.row() for sel in selected_rows]
+        row_list.sort(reverse=True)
+
+        for row in row_list:
+            self.model.removeRows(row, 1)
+
 
 
 def main():
-    
     app = QtGui.QApplication(sys.argv)
     ex = MyTable()
     sys.exit(app.exec_())
 
-
 if __name__ == '__main__':
     main()
+
 
