@@ -137,15 +137,15 @@ class MyModel(QtCore.QAbstractTableModel):
     # the following 3 methods (rowCount(...), columnCount(...), data(...)) must be implemented
     # default implementation of index(...), parent(...) are provided by the QAbstractTableModel class
     # Well behaved models will also implement headerData(...)
-    def rowCount(self, index):
+    def rowCount(self, index=QtCore.QModelIndex()):
         '''Returns the number of children for the given QModelIndex.'''
         return len(self._items)
 
-    def columnCount( self, index ):
+    def columnCount( self, index=QtCore.QModelIndex()):
         '''This model will have only one column.'''
         return 4
 
-    def data( self, index, role ):
+    def data( self, index, role= QtCore.Qt.DisplayRole):
         '''Return the display name of the PyNode from the item at the given index.'''
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
 
@@ -153,7 +153,7 @@ class MyModel(QtCore.QAbstractTableModel):
             col = index.column()
 
             if col == 0:
-				return self._items[row].camera
+                return self._items[row].camera
             elif col == 1:
                 return str(self._items[row].start_time)
             elif col == 2:
@@ -166,24 +166,24 @@ class MyModel(QtCore.QAbstractTableModel):
 
     def setData(self, index, value, role=QtCore.Qt.EditRole):
 
-    	if role == QtCore.Qt.EditRole:
-    		
-    		row = index.row()
-    		col = index.column()
+        if role == QtCore.Qt.EditRole:
+            
+            row = index.row()
+            col = index.column()
 
-    		if col == 0:
-    			self._items[row].camera = value
-    		elif col == 1:
-    			self._items[row].start_time = value
-    		elif col == 2:
-    			self._items[row].end_time = value
-    		elif col == 3:
-    			self._items[row].notes = value
+            if col == 0:
+                self._items[row].camera = value
+            elif col == 1:
+                self._items[row].start_time = value
+            elif col == 2:
+                self._items[row].end_time = value
+            elif col == 3:
+                self._items[row].notes = value
 
-    		self.dataChanged.emit(index, index)
-    		return True
+            self.dataChanged.emit(index, index)
+            return True
 
-		return False
+        return False
 
     def flags( self, index ):
         '''Valid items are selectable, editable, and drag and drop enabled. Invalid indices (open space in the view)
@@ -196,16 +196,26 @@ class MyModel(QtCore.QAbstractTableModel):
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled |  QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
 
     def insertRows(self, position, rows, parent=QtCore.QModelIndex()):
-    	''' this will insert empty rows'''
+        ''' this will insert empty rows'''
 
-    	self.beginInsertRows(QtCore.QModelIndex(), position, position + rows - 1)
+        self.beginInsertRows(QtCore.QModelIndex(), position, position + rows - 1)
 
-    	for i in range(rows):
-    		self._items.insert(position, MyItem('', 0, 0, ''))
+        for i in range(rows):
+            self._items.insert(position, MyItem('', 0, 0, ''))
 
-    	self.endInsertRows()
+        self.endInsertRows()
 
-    	return True
+        return True
+
+    def append_item(self, item, parent=QtCore.QModelIndex()):
+        ''' this will append an item'''
+
+        position = self.rowCount()
+        self.beginInsertRows(QtCore.QModelIndex(), position, position)
+        self._items.insert(position, item)
+        self.endInsertRows()
+        return True
+
 
 class MyTable(QtGui.QWidget):
     
@@ -221,26 +231,20 @@ class MyTable(QtGui.QWidget):
         item1 = MyItem('camera1', 10, 20, 'notes 1')
         item2 = MyItem('camera2', 20, 50, 'notes 2')
         item3 = MyItem('camera3', 45, 110, 'notes 3')
-
         data = [item1, item2, item3]
 
         self.model = MyModel(data)
-        #self.model = MyModel([])
 
         tableview = MyTableView()
-        vbox.addWidget(tableview)
         tableview.setModel(self.model)
-
         tableview.setDragEnabled(True)
         tableview.setAcceptDrops(True)
         tableview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
         tableview.setAlternatingRowColors(True)
-
         tableview.setItemDelegate(MyDelegate(tableview))
 
-        #tableview.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-
         tableview.update()
+        vbox.addWidget(tableview)
 
         btn = QtGui.QPushButton("OK")
         btn.clicked.connect(self.add_item)
@@ -249,13 +253,10 @@ class MyTable(QtGui.QWidget):
         self.show()
 
     def add_item(self):
-    	#item = MyItem('camera3', 45, 110, 'notes 3')
-    	num_rows = self.model.rowCount(QtCore.QModelIndex())
-    	self.model.insertRows(num_rows, 1, QtCore.QModelIndex())
+        item = MyItem('new camera', 45, 110, 'bal bala asa')
+        self.model.append_item(item)
 
-    	#self.model._items.append
 
-        
 def main():
     
     app = QtGui.QApplication(sys.argv)
