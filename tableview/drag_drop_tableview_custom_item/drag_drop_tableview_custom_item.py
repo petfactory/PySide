@@ -189,11 +189,17 @@ class MyModel(QtCore.QAbstractTableModel):
         '''Valid items are selectable, editable, and drag and drop enabled. Invalid indices (open space in the view)
         are also drop enabled, so you can drop items onto the top level.
         '''
+        col = index.column()
+
         if not index.isValid():
             return QtCore.Qt.ItemIsEnabled
 
         else:
-            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled |  QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
+            if col == 0:
+                return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled |  QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
+            else:
+                return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
+
 
     def insertRows(self, position, rows, parent=QtCore.QModelIndex()):
         ''' this will insert empty rows'''
