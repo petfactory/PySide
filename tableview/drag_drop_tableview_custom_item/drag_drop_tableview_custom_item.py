@@ -87,9 +87,6 @@ class MyTableView(QtGui.QTableView):
 
     def startDrag(self, dropActions):
 
-        #print(self.horizontalHeader().offset())
-        #print(self.verticalHeader().offset())
-
         index = self.currentIndex()
         self.current_source = index
         drag = QtGui.QDrag(self)
@@ -98,8 +95,8 @@ class MyTableView(QtGui.QTableView):
         drag.setMimeData(mimedata)
 
         vis_rect = self.visualRect(index)
-        print(vis_rect)
-        vis_rect.translate(28, 28)
+        # we need to translate the rect by the width and height of the headers
+        vis_rect.translate(self.verticalHeader().sizeHint().width(), self.horizontalHeader().sizeHint().height())
         pixmap = QtGui.QPixmap()
         pixmap = pixmap.grabWidget(self, vis_rect)
         drag.setPixmap(pixmap)
