@@ -125,7 +125,7 @@ class MyTableView(QtGui.QTableView):
             source_data = self.model()._items[source_row]
             target_data = self.model()._items[target_row]
 
-            print('{0} was dropped on {1}'.format(source_data, target_data))
+            #print('{0} was dropped on {1}'.format(source_data, target_data))
 
             self.model()._items[source_row] = target_data
             self.model()._items[target_row] = source_data
