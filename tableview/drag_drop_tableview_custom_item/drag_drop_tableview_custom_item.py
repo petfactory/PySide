@@ -79,12 +79,17 @@ class MyTableView(QtGui.QTableView):
 
         self.current_source = None
 
-        #self.model.dataChanged.connect(self.model_changed)
+        self.verticalHeader().setMovable(False)
+
 
     def dragEnterEvent(self, event):
         event.accept()
 
     def startDrag(self, dropActions):
+
+        #print(self.horizontalHeader().offset())
+        #print(self.verticalHeader().offset())
+
         index = self.currentIndex()
         self.current_source = index
         drag = QtGui.QDrag(self)
@@ -92,8 +97,15 @@ class MyTableView(QtGui.QTableView):
         mimedata.setData('application/x-pynode-item-instance', 'pet')
         drag.setMimeData(mimedata)
 
-        if drag.start(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
-            pass
+        vis_rect = self.visualRect(index)
+        print(vis_rect)
+        vis_rect.translate(28, 28)
+        pixmap = QtGui.QPixmap()
+        pixmap = pixmap.grabWidget(self, vis_rect)
+        drag.setPixmap(pixmap)
+
+        drag.start(QtCore.Qt.MoveAction)
+
 
     def dragMoveEvent(self, event):
 
