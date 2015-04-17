@@ -79,6 +79,8 @@ class MyTableView(QtGui.QTableView):
 
         self.current_source = None
 
+        #self.model.dataChanged.connect(self.model_changed)
+
     def dragEnterEvent(self, event):
         event.accept()
 
@@ -124,6 +126,26 @@ class MyTableView(QtGui.QTableView):
 
         else:
             event.ignore()
+
+    def dataChanged(self, top_left, bottom_right):
+
+        model = self.model()
+        val = model.data(top_left)
+
+        selection_model = self.selectionModel()
+        selected_indexes = selection_model.selectedIndexes()
+        changed_col = top_left.column()
+
+        model.blockSignals(True)
+        
+        for index in selected_indexes:
+            if index.column() != changed_col:
+                continue
+            model.setData(index, val)
+
+        model.blockSignals(False)
+        #self.tableview.viewport().update()
+
 
 class MyModel(QtCore.QAbstractTableModel):
 
@@ -253,6 +275,7 @@ class MyTable(QtGui.QWidget):
         data = [item1, item2, item3]
 
         self.model = MyModel(data)
+        #self.model.dataChanged.connect(self.model_changed)
 
         self.tableview = MyTableView()
         self.tableview.setModel(self.model)
@@ -264,12 +287,6 @@ class MyTable(QtGui.QWidget):
 
         self.tableview.update()
         vbox.addWidget(self.tableview)
-
-        '''
-        btn = QtGui.QPushButton("OK")
-        btn.clicked.connect(self.add_item)
-        vbox.addWidget(btn)
-        '''
 
         add_remove_hbox = QtGui.QHBoxLayout()
         vbox.addLayout(add_remove_hbox)
@@ -286,14 +303,8 @@ class MyTable(QtGui.QWidget):
 
         self.show()
 
-    '''
-    def add_item(self):
-        item = MyItem('new camera', 45, 110, 'bal bala asa')
-        self.model.append_item(item)
-    '''
-
     def add_btn_clicked(self):
-        item = MyItem('new camera', 45, 110, 'bal bala asa')
+        item = MyItem('camera{0}'.format(self.model.rowCount()+1), 45, 110, 'bal bala asa')
         self.model.append_item(item)
 
     def remove_btn_clicked(self):
