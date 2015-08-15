@@ -37,20 +37,23 @@ class Widget(QtGui.QWidget):
         self.equations = {}
         self.equations['linear'] = linear
         self.equations['easeInOutCubic'] = easeInOutCubic
-        self.equations['easeInCubic'] = easeInCubic
         self.equations['easeOutCubic'] = easeOutCubic
-        
+        self.equations['easeInCubic'] = easeInCubic
 
         vbox = QtGui.QVBoxLayout()
         vbox.setContentsMargins(5,5,5,5)
         self.setLayout(vbox)
-        self.curve_canvas = CurveCanvas(self.equations['linear'])
-        vbox.addWidget(self.curve_canvas)
 
         self.combo = QtGui.QComboBox()
+        self.curve_canvas = CurveCanvas(self.equations.get(self.combo.currentText()))
+
+        
         self.combo.addItems(self.equations.keys())
-        vbox.addWidget(self.combo)
         self.combo.currentIndexChanged.connect(self.index_changed)
+        self.combo.setCurrentIndex(3)
+
+        vbox.addWidget(self.curve_canvas)
+        vbox.addWidget(self.combo)
 
         self.min_spinbox = QtGui.QDoubleSpinBox()
         self.min_spinbox.setSingleStep(.05)
@@ -69,15 +72,53 @@ class Widget(QtGui.QWidget):
 
         self.max_spinbox.valueChanged.connect(self.max_spinbox_change)
 
+
+        self.process_data_btn = QtGui.QPushButton('Process')
+        vbox.addWidget(self.process_data_btn)
+        self.process_data_btn.clicked.connect(self.process_data)
+
+    def process_data(self):
+
+        #print(self.combo.currentText())
+        equation = self.equations.get(self.combo.currentText())
+        num = 30
+        mult = 100
+        p_list = [i*(1.0/(num-1)) for i in range(num)]
+        #print(p_list)
+
+        for p in p_list:
+            u = min(1.0,max(0, lerp(self.min_spinbox.value(),0,self.max_spinbox.value(),1,p)))
+            y = equation(u, 0, 1.0, 1.0)
+            print(y*mult)
+
+
     def index_changed(self, index):
         self.curve_canvas.change_equation(self.equations.get(self.combo.currentText()))
         self.curve_canvas.repaint()
 
     def min_spinbox_change(self, val):
+
+        limit = self.max_spinbox.value()-.05
+        if val > limit:
+            self.min_spinbox.blockSignals(True)
+            self.min_spinbox.setValue(limit)
+            self.min_spinbox.blockSignals(False)
+            val = limit
+
         self.curve_canvas.change_min(val)
         self.curve_canvas.repaint()
 
+
+
     def max_spinbox_change(self, val):
+
+        limit = self.min_spinbox.value()+.05
+        if val < limit:
+            self.max_spinbox.blockSignals(True)
+            self.max_spinbox.setValue(limit)
+            self.max_spinbox.blockSignals(False)
+            val = limit
+
         self.curve_canvas.change_max(val)
         self.curve_canvas.repaint()
 
