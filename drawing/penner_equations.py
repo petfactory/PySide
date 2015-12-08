@@ -25,14 +25,25 @@ def easeInOutCubic(t, b, c, d):
     t -= 2
     return c/2*(t*t*t + 2) + b
 
+
 class Widget(QtGui.QWidget):
     
+    #def __init__(self, parent=None):
     def __init__(self):
+        #super(Widget, self).__init__(parent)
         super(Widget, self).__init__()
         
+        #self.setWindowFlags(QtCore.Qt.Tool)
         self.setGeometry(50, 50, 200, 200)
         self.setWindowTitle('Widget')
-        self.show()
+        self.bg_color = QtGui.QColor(68,68,68)
+
+        #self.setAutoFillBackground(True)
+        p = self.palette()
+        p.setColor(self.backgroundRole(), self.bg_color)
+        self.setPalette(p)
+
+        
 
         self.equations = {}
         self.equations['linear'] = linear
@@ -45,9 +56,8 @@ class Widget(QtGui.QWidget):
         self.setLayout(vbox)
 
         self.combo = QtGui.QComboBox()
-        self.curve_canvas = CurveCanvas(self.equations.get(self.combo.currentText()))
+        self.curve_canvas = CurveCanvas(self.equations.get(self.combo.currentText()), self.bg_color)
 
-        
         self.combo.addItems(self.equations.keys())
         self.combo.currentIndexChanged.connect(self.index_changed)
         self.combo.setCurrentIndex(3)
@@ -59,7 +69,6 @@ class Widget(QtGui.QWidget):
         self.min_spinbox.setSingleStep(.05)
         self.min_spinbox.setRange(0, 0.95)
         vbox.addWidget(self.min_spinbox)
-
         self.min_spinbox.valueChanged.connect(self.min_spinbox_change)
 
 
@@ -67,15 +76,15 @@ class Widget(QtGui.QWidget):
         self.max_spinbox.setSingleStep(.05)
         self.max_spinbox.setRange(0.05, 1.0)
         self.max_spinbox.setValue(1.0)
-
         vbox.addWidget(self.max_spinbox)
-
         self.max_spinbox.valueChanged.connect(self.max_spinbox_change)
-
 
         self.process_data_btn = QtGui.QPushButton('Process')
         vbox.addWidget(self.process_data_btn)
         self.process_data_btn.clicked.connect(self.process_data)
+
+
+        self.show()
 
     def process_data(self):
 
@@ -126,12 +135,17 @@ class Widget(QtGui.QWidget):
 
 class CurveCanvas(QtGui.QWidget):
     
-    def __init__(self, equation):
+    def __init__(self, equation, bg_color):
         super(CurveCanvas, self).__init__()
         
+        self.setMinimumHeight(20)
         self.equation = equation
         self.min = 0.0
         self.max = 1.0
+        self.bg_color = bg_color
+        self.grid_color = self.bg_color.lighter(110)
+        self.line_color = self.bg_color.lighter(130)
+        self.dot_color = self.bg_color.lighter(160)
 
     def paintEvent(self, e):
 
@@ -147,7 +161,7 @@ class CurveCanvas(QtGui.QWidget):
         offset = 6
 
         pen = QtGui.QPen()  # creates a default pen
-        pen.setColor(QtGui.QColor(210,210,210))
+        pen.setColor(self.grid_color)
         pen.setWidth(1)
         qp.setPen(pen)
 
@@ -166,7 +180,7 @@ class CurveCanvas(QtGui.QWidget):
         old_min = self.min
         old_max = self.max
 
-        pen.setColor(QtGui.QColor(150,150,150))
+        pen.setColor(self.line_color)
         qp.setPen(pen)
 
         for i in range(num-1):
@@ -184,7 +198,7 @@ class CurveCanvas(QtGui.QWidget):
 
 
         pen.setWidth(4)
-        pen.setColor(QtCore.Qt.black)
+        pen.setColor(self.dot_color)
         qp.setPen(pen)
 
         for i in range(num):
