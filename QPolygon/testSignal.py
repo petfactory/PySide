@@ -24,13 +24,23 @@ class TestSignal(QtGui.QWidget):
         layout.addWidget(self.label)
         self.setLayout(layout)
 
-        self.dot = QtCore.QPoint(130, 150)
+        self.dot = QtCore.QPoint(230, 140)
 
+        '''
         posList = [ QtCore.QPoint(100, 100),
                     QtCore.QPoint(100, 200),
                     QtCore.QPoint(200, 200),
                     QtCore.QPoint(200, 100),
                     QtCore.QPoint(100, 100)
+                    ]'''
+
+        posList = [ QtCore.QPoint(100, 100),
+                    QtCore.QPoint(250, 100),
+                    QtCore.QPoint(250, 150),
+                    QtCore.QPoint(200, 150),
+                    QtCore.QPoint(200, 250),
+                    QtCore.QPoint(100, 250),
+                    QtCore.QPoint(100, 100),
                     ]
 
         self.polygon = QtGui.QPolygon(posList)
