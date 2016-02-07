@@ -55,6 +55,7 @@ class CanvasWidget(QtGui.QWidget):
         self.fontSize = 12
         self.font = 'Arial'
         self.strokeColor = QtGui.QColor(242, 165, 12)
+        self.previewStrokeColor = QtGui.QColor(42, 165, 221)
 
     def paintEvent(self, e):
 
@@ -76,6 +77,19 @@ class CanvasWidget(QtGui.QWidget):
             qp.drawPolyline(polygon)
             qp.drawText(labelPos, name)
 
+        if self._parent.previewDict is not None:
+
+            qp.setPen(self.previewStrokeColor)
+
+            for name, infoDict in self._parent.previewDict.iteritems():
+
+                polygon = infoDict.get('polygon')
+                labelPos = infoDict.get('labelPos')
+
+                qp.drawPolyline(polygon)
+                qp.drawText(labelPos, name)
+
+
 
 class SortableDelegate(QtGui.QItemDelegate):
     
@@ -94,6 +108,10 @@ class AddHitAreaWin(QtGui.QWidget):
     
     def __init__(self, parent=None):
         super(AddHitAreaWin, self).__init__(parent) 
+
+        self.labelName = None
+        self.labelPos = None
+        self.posList = None
 
         self.setGeometry(980, 50, 300, 350)
         self.setWindowTitle('Add Hit Area')
@@ -144,12 +162,9 @@ class AddHitAreaWin(QtGui.QWidget):
         self.hitAreaTableView.setColumnWidth(0,50)
         gridLayout.addWidget(self.hitAreaTableView, 2, 1)
 
-
         removeAllVertexButton = QtGui.QPushButton('Remove Vertices')
         gridLayout.addWidget(removeAllVertexButton, 3, 1)
         removeAllVertexButton.clicked.connect(self.removeAllVertexButtonClicked)
-
-
 
         addHitAreaButton = QtGui.QPushButton('Add Hit Area')
         addHitAreaButton.clicked.connect(self.addHitAreaButtonClicked)
@@ -159,9 +174,12 @@ class AddHitAreaWin(QtGui.QWidget):
         self.appendVertexClicked = Signal()
         self.addHitAreaClicked = Signal()
         self.addHitAreaCanceled = Signal()
+        self.verticesWasRemoved = Signal()
 
     def removeAllVertexButtonClicked(self):
         self.cleanModel(self.vertexModel)
+        print 'emit verts was rem'
+        self.verticesWasRemoved.emit()
 
     def cleanModel(self, model):
          numRows = model.rowCount()
@@ -196,6 +214,26 @@ class AddHitAreaWin(QtGui.QWidget):
         #self.addHitAreaClicked.emit(TestSignal.ADD_HIT_AREA_STATE)
         self.addHitAreaClicked.emit(TestSignal.VRED_STATE)
 
+    def getPreviewInfo(self):
+
+        label = self.addTargetNodeLineEdit.text()
+
+        labelPos = (self.labelPosXSpinBox.value(), self.labelPosYSpinBox.value())
+
+        hitAreaVerts = []
+        numRows = self.vertexModel.rowCount()
+        for row in range(numRows):
+            x = int(self.vertexModel.item(row, 0).text())
+            y = int(self.vertexModel.item(row, 1).text())
+            hitAreaVerts.append((x, y))
+
+        infoDict = {}
+        infoDict['labelPos'] = labelPos
+        infoDict['hitAreaVerts'] = hitAreaVerts
+
+        retDict = {label:infoDict}
+        return retDict
+
     def closeEvent(self, event):
 
         self.addHitAreaClicked.emit(TestSignal.ADD_HIT_AREA_CANCELED_STATE)
@@ -222,6 +260,7 @@ class TestSignal(QtGui.QWidget):
         super(TestSignal, self).__init__(parent) 
 
         self.addHitAreaWin = None
+        self.previewDict = None
         self._state = TestSignal.VRED_STATE
 
         self.setGeometry(980, 50, 380, 350)
@@ -276,13 +315,18 @@ class TestSignal(QtGui.QWidget):
         scrollArea.clicked.connect(self.scrollClicked)
 
 
+    def hitAreawasAdded(self, state):
+        self.previewDict = self.parseInfo(self.addHitAreaWin.getPreviewInfo())
+        self.repaint()
+        self._state = TestSignal.VRED_STATE
+
+    def verticesWasRemoved(self):
+        self.previewDict = self.parseInfo(self.addHitAreaWin.getPreviewInfo())
+        self.repaint()
 
     def setState(self, state):
 
         if state == TestSignal.ADD_HIT_AREA_CANCELED_STATE:
-            newState = TestSignal.VRED_STATE
-
-        elif self._state == TestSignal.ADD_HIT_AREA_STATE:
             newState = TestSignal.VRED_STATE
 
         else:
@@ -294,6 +338,7 @@ class TestSignal(QtGui.QWidget):
 
         print 'State Set to -> {}'.format(self._state)
 
+
     def openAddHitAreaWin(self):
 
         if self.addHitAreaWin is None:
@@ -303,8 +348,10 @@ class TestSignal(QtGui.QWidget):
 
         self.addHitAreaWin.setLabelPosClicked.connect(self.setState)
         self.addHitAreaWin.appendVertexClicked.connect(self.setState)
-        self.addHitAreaWin.addHitAreaClicked.connect(self.setState)
+        self.addHitAreaWin.addHitAreaClicked.connect(self.hitAreawasAdded)
         self.addHitAreaWin.addHitAreaCanceled.connect(self.setState)
+        self.addHitAreaWin.verticesWasRemoved.connect(self.verticesWasRemoved)
+        
 
     def scrollClicked(self, point, *args):
 
@@ -331,6 +378,8 @@ class TestSignal(QtGui.QWidget):
 
             self.addHitAreaWin.labelPosXSpinBox.setValue(point.x())
             self.addHitAreaWin.labelPosYSpinBox.setValue(point.y())
+            self.previewDict = self.parseInfo(self.addHitAreaWin.getPreviewInfo())
+            self.repaint()
 
 
         elif self._state == TestSignal.APPEND_VERTEX_STATE:
@@ -340,6 +389,8 @@ class TestSignal(QtGui.QWidget):
                 return
 
             self.addHitAreaWin.addVertexPos(point.x(), point.y())
+            self.previewDict = self.parseInfo(self.addHitAreaWin.getPreviewInfo())
+            self.repaint()
 
 
     def parseInfo(self, hitAreaDict):
