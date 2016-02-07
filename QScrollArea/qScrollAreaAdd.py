@@ -77,6 +77,19 @@ class CanvasWidget(QtGui.QWidget):
             qp.drawText(labelPos, name)
 
 
+class SortableDelegate(QtGui.QItemDelegate):
+    
+    def __init__(self, parent=None):
+        super(SortableDelegate, self).__init__(parent)
+        
+    def createEditor(self, parent, option, index):
+        
+        #col = index.column()
+
+        spinBox = QtGui.QSpinBox(parent)
+        spinBox.setRange(0,9999)
+        return spinBox
+
 class AddHitAreaWin(QtGui.QWidget):
     
     def __init__(self, parent=None):
@@ -84,7 +97,7 @@ class AddHitAreaWin(QtGui.QWidget):
 
         self.setGeometry(980, 50, 300, 350)
         self.setWindowTitle('Add Hit Area')
-
+ 
         vbox = QtGui.QVBoxLayout(self)
         gridLayout = QtGui.QGridLayout()
 
@@ -107,8 +120,10 @@ class AddHitAreaWin(QtGui.QWidget):
         gridLayout.addLayout(labelPosHbox, 1,1)
 
         self.labelPosXSpinBox = QtGui.QSpinBox()
+        self.labelPosXSpinBox.setRange(0,9999)
         labelPosHbox.addWidget(self.labelPosXSpinBox)
         self.labelPosYSpinBox = QtGui.QSpinBox()
+        self.labelPosYSpinBox.setRange(0,9999)
         labelPosHbox.addWidget(self.labelPosYSpinBox)
 
         appendVertexButton = QtGui.QPushButton('Append Vertex')
@@ -116,8 +131,25 @@ class AddHitAreaWin(QtGui.QWidget):
         appendVertexButton.clicked.connect(self.appendVertexButtonClicked)
         gridLayout.addWidget(appendVertexButton, 2, 0, QtCore.Qt.AlignTop)
         
-        self.hitAreaListView = QtGui.QListView()
-        gridLayout.addWidget(self.hitAreaListView, 2, 1)
+        self.vertexModel = QtGui.QStandardItemModel()
+        self.vertexModel.setHorizontalHeaderLabels(['X', 'Y'])
+
+
+        self.hitAreaTableView = QtGui.QTableView()
+        self.hitAreaTableView.setModel(self.vertexModel)
+        self.hitAreaTableView.setItemDelegate(SortableDelegate(self.hitAreaTableView))
+        self.hitAreaTableView.horizontalHeader().setStretchLastSection(True)
+        self.hitAreaTableView.setAlternatingRowColors(True)
+        self.hitAreaTableView.verticalHeader().hide()
+        self.hitAreaTableView.setColumnWidth(0,50)
+        gridLayout.addWidget(self.hitAreaTableView, 2, 1)
+
+
+        removeAllVertexButton = QtGui.QPushButton('Remove Vertices')
+        gridLayout.addWidget(removeAllVertexButton, 3, 1)
+        removeAllVertexButton.clicked.connect(self.removeAllVertexButtonClicked)
+
+
 
         addHitAreaButton = QtGui.QPushButton('Add Hit Area')
         addHitAreaButton.clicked.connect(self.addHitAreaButtonClicked)
@@ -128,18 +160,45 @@ class AddHitAreaWin(QtGui.QWidget):
         self.addHitAreaClicked = Signal()
         self.addHitAreaCanceled = Signal()
 
+    def removeAllVertexButtonClicked(self):
+        self.cleanModel(self.vertexModel)
+
+    def cleanModel(self, model):
+         numRows = model.rowCount()
+         for row in range(numRows):
+             model.removeRow(0)
+
+    def addVertexPos(self, x, y):
+
+        numRows = self.vertexModel.rowCount()
+
+        vertexItemX = switchNameItem = QtGui.QStandardItem(str(x))
+        #variantSetItem.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+
+        vertexItemY = switchNameItem = QtGui.QStandardItem(str(y))
+        #variantSetItem.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+
+        self.vertexModel.setItem(numRows, 0, vertexItemX)
+        self.vertexModel.setItem(numRows, 1, vertexItemY)
+
+
     def setLabelPosButtonClicked(self):
         self.setLabelPosClicked.emit(TestSignal.SET_LABEL_POS_STATE)
 
     def appendVertexButtonClicked(self):
-        self.appendVertexClicked.emit(TestSignal.APPEND_VERTAX_STATE)
+        self.appendVertexClicked.emit(TestSignal.APPEND_VERTEX_STATE)
 
     def addHitAreaButtonClicked(self):
-        self.addHitAreaClicked.emit(TestSignal.ADD_HIT_AREA_STATE)
+        self.addTargetNodeLineEdit.setText('')
+        self.labelPosXSpinBox.setValue(0)
+        self.labelPosYSpinBox.setValue(0)
+        self.cleanModel(self.vertexModel)
+        #self.addHitAreaClicked.emit(TestSignal.ADD_HIT_AREA_STATE)
+        self.addHitAreaClicked.emit(TestSignal.VRED_STATE)
 
     def closeEvent(self, event):
 
-        self.addHitAreaClicked.emit(TestSignal.ADD_HIT_AREA_CANCELED)
+        self.addHitAreaClicked.emit(TestSignal.ADD_HIT_AREA_CANCELED_STATE)
 
         '''
         if False:
@@ -155,9 +214,9 @@ class TestSignal(QtGui.QWidget):
     
     VRED_STATE = 'VRED_STATE'
     SET_LABEL_POS_STATE = 'SET_LABEL_POS_STATE'
-    APPEND_VERTAX_STATE = 'APPEND_VERTAX_STATE'
+    APPEND_VERTEX_STATE = 'APPEND_VERTEX_STATE'
     ADD_HIT_AREA_STATE = 'ADD_HIT_AREA_STATE'
-    ADD_HIT_AREA_CANCELED = 'ADD_HIT_AREA_CANCELED'
+    ADD_HIT_AREA_CANCELED_STATE = 'ADD_HIT_AREA_CANCELED_STATE'
 
     def __init__(self, parent=None):
         super(TestSignal, self).__init__(parent) 
@@ -173,8 +232,9 @@ class TestSignal(QtGui.QWidget):
         mainLayout.setContentsMargins(0,0,0,0)
 
         self.menubar = QtGui.QMenuBar()
-        self.menubar.setFixedHeight(20)
+        #self.menubar.setFixedHeight(20)
         mainLayout.addWidget(self.menubar)
+        self.menubar.setNativeMenuBar(False)
         self.fileMenu = self.menubar.addMenu('File')
 
         self.addHitAreaAction = QtGui.QAction('Add Hit Area', self)
@@ -219,10 +279,18 @@ class TestSignal(QtGui.QWidget):
 
     def setState(self, state):
 
-        if state == TestSignal.ADD_HIT_AREA_CANCELED:
-            state = TestSignal.VRED_STATE
+        if state == TestSignal.ADD_HIT_AREA_CANCELED_STATE:
+            newState = TestSignal.VRED_STATE
 
-        self._state = state
+        elif self._state == TestSignal.ADD_HIT_AREA_STATE:
+            newState = TestSignal.VRED_STATE
+
+        else:
+            newState = state
+
+        print 'Current State -> {}'.format(self._state)
+
+        self._state = newState
 
         print 'State Set to -> {}'.format(self._state)
 
@@ -240,7 +308,7 @@ class TestSignal(QtGui.QWidget):
 
     def scrollClicked(self, point, *args):
 
-        print 'State -> {}'.format(self._state)
+        print 'Current State -> {}'.format(self._state)
 
         if self._state == TestSignal.VRED_STATE:
 
@@ -254,6 +322,24 @@ class TestSignal(QtGui.QWidget):
                     return
 
             print 'No hit'
+
+        elif self._state == TestSignal.SET_LABEL_POS_STATE:
+
+            if self.addHitAreaWin is None:
+                print 'addHitAreaWin is not initialized!'
+                return
+
+            self.addHitAreaWin.labelPosXSpinBox.setValue(point.x())
+            self.addHitAreaWin.labelPosYSpinBox.setValue(point.y())
+
+
+        elif self._state == TestSignal.APPEND_VERTEX_STATE:
+
+            if self.addHitAreaWin is None:
+                print 'addHitAreaWin is not initialized!'
+                return
+
+            self.addHitAreaWin.addVertexPos(point.x(), point.y())
 
 
     def parseInfo(self, hitAreaDict):
