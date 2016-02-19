@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+
+<root name="CAR">
+		<node name="A__STANCE">
+			<node name="INT">
+				<node name="INT_SEATS">
+						<node name="INT_DRIVER_SEAT">
+							<node name="G__INT_DRIVER_SEAT"/>
+						</node>
+						<node name="INT_PASSENGER_SEAT">
+							<node name="G__INT_PASSENGER_SEAT"/>
+						</node>
+						<node name="INT_REAR_SEAT">
+							<node name="G__INT_REAR_SEAT"/>
+						</node>
+					</node>
+			</node>
+			<node name="EXT">
+			</node>
+			<node name="DOORS">
+			</node>
+		</node>
+		<node name="WHEELS">
+		</node>
+</root>
