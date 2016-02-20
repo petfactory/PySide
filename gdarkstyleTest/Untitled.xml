@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <root>
 	<node name="CAR">
-		<node name="A__STANCE">
+		<node name="C__STANCE">
 			<node name="INT">
 				<node name="INT_SEATS">
 					<node name="INT_DRIVER_SEAT">

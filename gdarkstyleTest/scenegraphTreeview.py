@@ -57,10 +57,15 @@ class HierarchyTreeview(QtGui.QWidget):
         
         self.fileMenu = self.menubar.addMenu('File')
 
-        self.openCadExteriorRefAction = QtGui.QAction('Export XML', self)
-        self.openCadExteriorRefAction.triggered.connect(self.export_xml)
-        self.fileMenu.addAction(self.openCadExteriorRefAction)
+        export_xml_action = QtGui.QAction('Export XML', self)
+        export_xml_action.triggered.connect(self.export_xml)
+        self.fileMenu.addAction(export_xml_action)
 
+        load_xml_action = QtGui.QAction('Load XML', self)
+        load_xml_action.triggered.connect(self.load_xml)
+        self.fileMenu.addAction(load_xml_action)
+
+        
         self.add_quick_butons_action = QtGui.QAction('Add Quick Buttons', self)
         self.add_quick_butons_action.triggered.connect(self.refresh_button_clicked)
         self.fileMenu.addAction(self.add_quick_butons_action)
@@ -105,58 +110,6 @@ class HierarchyTreeview(QtGui.QWidget):
 
         self.populateModel()
 
-        #self.treeview.setStyleSheet(
-        ''' QTreeView {
-                alternate-background-color: #AAAAAA;
-                background: #A2A2A2;
-                color: rgb(90, 90, 90);
-                selection-background-color: #555555;
-            }
-            QTreeView::item:focus {
-              background-color: #555555;
-              color: #ffcc00;
-            }
-
-            QTreeView::branch::closed::has-children {
-                image: url(branch_closed.png);
-            }
-
-            QTreeView::branch::open::has-children {
-                image: url(branch_open.png);
-            }
-        '''
-        #)
-
-
-        #self.setStyleSheet(
-        '''
-            QPushButton {
-                background-color: #AAAAAA;
-                color: #222222;
-                max-height: 20px;
-                font: 11px;
-            }
-
-            QPushButton:pressed {
-                background-color: #AAAAAA;
-                color: #555555;
-                max-height: 20px;
-                font: 11px;
-            }
-
-            QFrame {
-                background-color: #888888;
-            }
-
-            QSplitter::handle {
-                image: url(branch_open.png);
-            }
-
-            QSplitter::handle:pressed {
-                image: url(branch_closed.png);
-            }
-            '''
-        #)
 
         quick_button_frame = QtGui.QFrame()
         quick_button_main_vbox = QtGui.QVBoxLayout(quick_button_frame)
@@ -165,9 +118,6 @@ class HierarchyTreeview(QtGui.QWidget):
 
 
         quick_button_main_vbox.addStretch()
-        #refresh_button = QtGui.QPushButton('Refresh')
-        #refresh_button.clicked.connect(self.refresh_button_clicked)
-        #button_main_vbox.addWidget(refresh_button)
 
         splitter.addWidget(quick_button_frame)
         splitter.setSizes([400, 200])
@@ -343,8 +293,30 @@ class HierarchyTreeview(QtGui.QWidget):
 
         self.create_item_recurse(xml_root, root_item)
 
+    def load_xml(self):
+
+        fname, _ = QtGui.QFileDialog.getOpenFileName(self, caption='Open file', directory='/home', filter='*.xml')
+
+        if(fname):
+
+            tree = ET.parse(fname)
+            xml_root = tree.getroot()
+
+            root_item = self.model.invisibleRootItem()
+            self.cleanModel()
+
+            xml_children = xml_root.getchildren()
+            if xml_children:
+
+                for xml_child in xml_children:
+
+                    self.create_item_recurse(xml_child, root_item)
+
     def export_xml(self):
 
+        # TODO the export will only get the first q item (the first child of the invisible root)
+        # may be fix?
+        
         xml_parent = ET.Element('root')
         q_item = self.model.invisibleRootItem()
         q_child = q_item.child(0, 0)
