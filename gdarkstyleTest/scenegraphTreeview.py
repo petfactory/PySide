@@ -44,9 +44,25 @@ class HierarchyTreeview(QtGui.QWidget):
 
         self.setGeometry(10, 50, 600, 400)
         self.setWindowTitle("TEST")
-                
-        vbox = QtGui.QVBoxLayout(self)
-        vbox.setContentsMargins(0,0, 0, 0)
+        
+
+        # main layout
+        mainLayout = QtGui.QVBoxLayout(self)
+        mainLayout.setContentsMargins(0,0,0,0)
+        
+        self.menubar = QtGui.QMenuBar()
+        self.menubar.setFixedHeight(20)
+        mainLayout.addWidget(self.menubar)
+        self.fileMenu = self.menubar.addMenu('File')
+
+        self.openCadExteriorRefAction = QtGui.QAction('Export XML', self)
+        self.openCadExteriorRefAction.triggered.connect(self.export_xml)
+        self.fileMenu.addAction(self.openCadExteriorRefAction)
+        self.menubar.setNativeMenuBar(False)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.setContentsMargins(6,6,6,6)
+        mainLayout.addLayout(vbox)
 
         # splitter
         splitter = QtGui.QSplitter()
@@ -61,17 +77,16 @@ class HierarchyTreeview(QtGui.QWidget):
         self.treeview.setAlternatingRowColors(True)
         treeview_vbox.addWidget(self.treeview)
 
-        refresh_button = QtGui.QPushButton('Refresh')
-        refresh_button.clicked.connect(self.refresh_button_clicked)
-        treeview_vbox.addWidget(refresh_button)
-
+        #
+        treeview_button_hbox = QtGui.QHBoxLayout()
+        treeview_vbox.addLayout(treeview_button_hbox)
         add_button = QtGui.QPushButton('+')
         add_button.clicked.connect(self.add_button_clicked)
-        treeview_vbox.addWidget(add_button)
+        treeview_button_hbox.addWidget(add_button)
 
         remove_button = QtGui.QPushButton('-')
         remove_button.clicked.connect(self.remove_button_clicked)
-        treeview_vbox.addWidget(remove_button)
+        treeview_button_hbox.addWidget(remove_button)
         
         splitter.addWidget(treeview_parent_frame)
         self.treeview.setHeaderHidden(True)
@@ -136,15 +151,18 @@ class HierarchyTreeview(QtGui.QWidget):
             '''
         #)
 
-        button_widget = QtGui.QWidget()
-
-        button_main_vbox = QtGui.QVBoxLayout(button_widget)
-
+        quick_button_frame = QtGui.QFrame()
+        quick_button_main_vbox = QtGui.QVBoxLayout(quick_button_frame)
         self.button_vbox = QtGui.QVBoxLayout()
-        button_main_vbox.addLayout(self.button_vbox)
-        button_main_vbox.addStretch()
+        quick_button_main_vbox.addLayout(self.button_vbox)
 
-        splitter.addWidget(button_widget)
+
+        quick_button_main_vbox.addStretch()
+        #refresh_button = QtGui.QPushButton('Refresh')
+        #refresh_button.clicked.connect(self.refresh_button_clicked)
+        #button_main_vbox.addWidget(refresh_button)
+
+        splitter.addWidget(quick_button_frame)
         splitter.setSizes([400, 200])
 
 
@@ -173,6 +191,23 @@ class HierarchyTreeview(QtGui.QWidget):
 
                 parent_index = self.model.indexFromItem(parent)
                 self.model.removeRow(row, parent_index)
+
+    @staticmethod
+    def get_xml_recurse(q_item, xml_parent):
+        '''Returns the dag_path_dict with the leaf item as key and the 
+        QStandardItem as value'''
+
+        name = q_item.text()
+        xml_node = ET.Element('node')
+        xml_node.set('name', name)
+
+        xml_parent.append(xml_node)
+
+        num_rows = q_item.rowCount()
+        for row in range(num_rows):
+            q_child = q_item.child(row, 0)
+            HierarchyTreeview.get_xml_recurse(q_child, xml_node)
+
 
     @staticmethod
     def get_item_recurse(item, dag_path_dict, parent_list=None):
@@ -301,6 +336,25 @@ class HierarchyTreeview(QtGui.QWidget):
 
         self.create_item_recurse(xml_root, root_item)
 
+    def export_xml(self):
+
+        xml_parent = ET.Element('root')
+        q_item = self.model.invisibleRootItem()
+        q_child = q_item.child(0, 0)
+
+        HierarchyTreeview.get_xml_recurse(q_child, xml_parent)
+
+        xmlString = ET.tostring(xml_parent)
+        miniDomXml = xml.dom.minidom.parseString(xmlString)
+        prettyXML = miniDomXml.toprettyxml()
+        #print(prettyXML)
+
+        fname, _ = QtGui.QFileDialog.getSaveFileName(caption='Save XML', directory='', filter='*.xml')
+
+        if(fname):
+            f = open(fname,'w')
+            f.write(prettyXML)
+            f.close()
 
 def main():
     
