@@ -313,15 +313,14 @@ class HierarchyTreeview(QtGui.QWidget):
                     self.create_item_recurse(xml_child, root_item)
 
     def export_xml(self):
-
-        # TODO the export will only get the first q item (the first child of the invisible root)
-        # may be fix?
-        
+    	
         xml_parent = ET.Element('root')
         q_item = self.model.invisibleRootItem()
-        q_child = q_item.child(0, 0)
 
-        HierarchyTreeview.get_xml_recurse(q_child, xml_parent)
+        num_rows = q_item.rowCount()
+        for row in range(num_rows):
+            q_child = q_item.child(row, 0)
+            HierarchyTreeview.get_xml_recurse(q_child, xml_parent)
 
         xmlString = ET.tostring(xml_parent)
         miniDomXml = xml.dom.minidom.parseString(xmlString)
