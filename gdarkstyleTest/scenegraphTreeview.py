@@ -88,6 +88,9 @@ class HierarchyTreeview(QtGui.QWidget):
         self.treeview.setAlternatingRowColors(True)
         self.treeview.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         treeview_vbox.addWidget(self.treeview)
+        self.treeview.setStyleSheet('''QTreeView {
+                color: rgb(120, 120, 120);
+            }''')
 
         #
         treeview_button_hbox = QtGui.QHBoxLayout()
@@ -256,12 +259,29 @@ class HierarchyTreeview(QtGui.QWidget):
          for row in range(numRows):
              self.model.removeRow(0)
 
+    def applyTint(self, path):
+
+        temp = QtGui.QPixmap(path)
+        color = QtGui.QColor(240,120,0, 255)
+        painter = QtGui.QPainter(temp)
+        painter.setCompositionMode(painter.CompositionMode_SourceIn)
+        painter.fillRect(temp.rect(), color)
+        painter.end()
+        return temp
+
     def create_item_recurse(self, xml_node, parent_item):
 
         name = xml_node.get('name')
         #node = Node(name)
 
         item = QtGui.QStandardItem(name)
+
+        if name.startswith('G__'):
+
+            pixmap = self.applyTint('switch.png')
+            icon = QtGui.QIcon(pixmap)
+            item.setIcon(icon)
+
         #item.setSizeHint(QtCore.QSize(0,20))
         
         #customData = CustomType(node)
@@ -313,7 +333,7 @@ class HierarchyTreeview(QtGui.QWidget):
                     self.create_item_recurse(xml_child, root_item)
 
     def export_xml(self):
-    	
+        
         xml_parent = ET.Element('root')
         q_item = self.model.invisibleRootItem()
 
