@@ -53,12 +53,18 @@ class HierarchyTreeview(QtGui.QWidget):
         self.menubar = QtGui.QMenuBar()
         self.menubar.setFixedHeight(20)
         mainLayout.addWidget(self.menubar)
+        self.menubar.setNativeMenuBar(False)
+        
         self.fileMenu = self.menubar.addMenu('File')
 
         self.openCadExteriorRefAction = QtGui.QAction('Export XML', self)
         self.openCadExteriorRefAction.triggered.connect(self.export_xml)
         self.fileMenu.addAction(self.openCadExteriorRefAction)
-        self.menubar.setNativeMenuBar(False)
+
+        self.add_quick_butons_action = QtGui.QAction('Add Quick Buttons', self)
+        self.add_quick_butons_action.triggered.connect(self.refresh_button_clicked)
+        self.fileMenu.addAction(self.add_quick_butons_action)
+        
 
         vbox = QtGui.QVBoxLayout()
         vbox.setContentsMargins(6,6,6,6)
@@ -75,6 +81,7 @@ class HierarchyTreeview(QtGui.QWidget):
         self.treeview = QtGui.QTreeView() #DeselectableTreeView()
         self.treeview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
         self.treeview.setAlternatingRowColors(True)
+        self.treeview.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         treeview_vbox.addWidget(self.treeview)
 
         #

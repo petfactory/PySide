@@ -5,18 +5,10 @@
 			<node name="INT">
 				<node name="INT_SEATS">
 					<node name="INT_DRIVER_SEAT">
-						<node name="G__INT_DRIVER_SEAT">
-							<node name="ITEM"/>
-							<node name="ITEM"/>
-							<node name="ITEM"/>
-						</node>
+						<node name="G__INT_DRIVER_SEAT"/>
 					</node>
 					<node name="INT_PASSENGER_SEAT">
-						<node name="G__INT_PASSENGER_SEAT">
-							<node name="ITEM"/>
-							<node name="ITEM"/>
-							<node name="ITEM"/>
-						</node>
+						<node name="G__INT_PASSENGER_SEAT"/>
 					</node>
 					<node name="INT_REAR_SEAT">
 						<node name="G__INT_REAR_SEAT"/>
