@@ -1,0 +1,3 @@
+([('scenegraphTreeview',
+   '/Users/johan/Dev/pyside/gdarkstyleTestPyInstaller/dist/scenegraphTreeview',
+   'EXECUTABLE')],)
