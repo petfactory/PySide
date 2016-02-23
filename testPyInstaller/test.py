@@ -14,11 +14,15 @@ class BaseWin(QtGui.QWidget):
 
         # layout
         vbox = QtGui.QVBoxLayout(self)
-       	button = QtGui.QPushButton()
-       	button.setIcon(QtGui.QIcon('logo.jpg'))
-       	button.setIconSize(QtCore.QSize(300,300))
-       	button.setFixedSize(320,320)
-       	vbox.addWidget(button)
+        button = QtGui.QPushButton()
+        button.setIcon(QtGui.QIcon('logo.jpg'))
+        button.setIconSize(QtCore.QSize(300,300))
+        button.setFixedSize(320,320)
+        button.clicked.connect(self.speak)
+        vbox.addWidget(button)
+
+    def speak(self):
+      print 'Hello world!'
 
 def main():
     
