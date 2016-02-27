@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, os
 from PySide import QtGui, QtCore
 
 class BaseWin(QtGui.QWidget):
@@ -15,14 +15,26 @@ class BaseWin(QtGui.QWidget):
         # layout
         vbox = QtGui.QVBoxLayout(self)
         button = QtGui.QPushButton()
-        button.setIcon(QtGui.QIcon('logo.jpg'))
+        image_path = self.resource_path('logo.jpg')
+        button.setIcon(QtGui.QIcon(image_path))
         button.setIconSize(QtCore.QSize(300,300))
         button.setFixedSize(320,320)
         button.clicked.connect(self.speak)
         vbox.addWidget(button)
 
     def speak(self):
-      print 'Hello world!'
+      path = self.resource_path('logo.jpg')
+      print('{} exists -> {}'.format(path, os.path.isfile(path)))
+
+    def resource_path(self, relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
 
 def main():
     

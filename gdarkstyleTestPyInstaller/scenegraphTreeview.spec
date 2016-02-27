@@ -2,11 +2,17 @@
 
 block_cipher = None
 
-
 a = Analysis(['scenegraphTreeview.py'],
              pathex=['/Users/johan/Dev/pyside/gdarkstyleTestPyInstaller'],
              binaries=None,
-             datas=[('scenegraph.xml', 'Resources')],
+             datas=[  ('scenegraph.xml', '.'),
+                      ('switch.png', '.'),
+                      ('vline.png', '.'),
+                      ('branch-more.png', '.'),
+                      ('branch-end.png', '.'),
+                      ('branch-closed.png', '.'),
+                      ('branch-open.png', '.')
+                    ],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

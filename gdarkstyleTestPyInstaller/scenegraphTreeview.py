@@ -43,7 +43,7 @@ class HierarchyTreeview(QtGui.QWidget):
         self.setWindowFlags(QtCore.Qt.Tool)
 
         self.setGeometry(10, 50, 600, 400)
-        self.setWindowTitle("TEST")
+        self.setWindowTitle("Test")
         
 
         # main layout
@@ -88,11 +88,48 @@ class HierarchyTreeview(QtGui.QWidget):
         self.treeview.setAlternatingRowColors(True)
         self.treeview.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         treeview_vbox.addWidget(self.treeview)
-        self.treeview.setStyleSheet('''QTreeView {
-                color: rgb(120, 120, 120);
-            }''')
 
-        #
+        self.setStyleSheet('''QAbstractItemView {
+                                    background-color: #aaaaaa;
+                                    alternate-background-color: #bbbbbb;
+                                    color: #444444;
+                            }''')
+
+
+        ss = '''QTreeView::branch:has-siblings:!adjoins-item {
+                border-image: url(%s) 0;
+            }
+
+            QTreeView::branch:has-siblings:adjoins-item {
+                border-image: url(%s) 0;
+            }
+
+            QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+                border-image: url(%s) 0;
+            }
+
+            QTreeView::branch:has-children:!has-siblings:closed,
+            QTreeView::branch:closed:has-children:has-siblings {
+                    border-image: none;
+                    image: url(%s);
+            }
+
+            QTreeView::branch:open:has-children:!has-siblings,
+            QTreeView::branch:open:has-children:has-siblings  {
+                    border-image: none;
+                    image: url(%s);
+            }'''
+
+        ss = ss % ( self.resource_path('vline.png'),
+                    self.resource_path('branch-more.png'),
+                    self.resource_path('branch-end.png'),
+                    self.resource_path('branch-closed.png'),
+                    self.resource_path('branch-open.png'))
+
+
+        #print ss
+        self.treeview.setStyleSheet(ss)
+
         treeview_button_hbox = QtGui.QHBoxLayout()
         treeview_vbox.addLayout(treeview_button_hbox)
         add_button = QtGui.QPushButton('+')
@@ -271,8 +308,9 @@ class HierarchyTreeview(QtGui.QWidget):
 
     def create_item_recurse(self, xml_node, parent_item):
 
-        dirName = os.path.dirname(os.path.realpath(__file__))
-        icon_path = os.path.join(dirName, r'switch.png')
+        #dirName = os.path.dirname(os.path.realpath(__file__))
+        #icon_path = os.path.join(dirName, r'switch.png')
+        icon_path = self.resource_path(r'switch.png')
 
         name = xml_node.get('name')
         #node = Node(name)
@@ -299,10 +337,21 @@ class HierarchyTreeview(QtGui.QWidget):
 
                 self.create_item_recurse(xml_child, item)
 
+    def resource_path(self, relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+
     def populateModel(self):
 
-        dirName = os.path.dirname(os.path.realpath(__file__))
-        xmlPath = os.path.join(dirName, r'scenegraph.xml')
+        #dirName = os.path.dirname(os.path.realpath(__file__))
+        xmlPath = self.resource_path(r'scenegraph.xml')
+        #xmlPath = os.path.join(dirName, )
 
         if not os.path.isfile(xmlPath):
             print('The xml file does not exist: {}'.format(xmlPath))
