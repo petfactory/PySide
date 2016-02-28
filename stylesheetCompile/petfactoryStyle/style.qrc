@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="petfactoryIcons">
+    <file>rc/mario.png</file>
+  </qresource>
+  <qresource prefix="petfactoryStyle">
+      <file>style.qss</file>
+  </qresource>
+</RCC>

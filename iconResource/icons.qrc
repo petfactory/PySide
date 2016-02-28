@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="qss_icons">
+    <file>media/mario.png</file>
+  </qresource>
+</RCC>

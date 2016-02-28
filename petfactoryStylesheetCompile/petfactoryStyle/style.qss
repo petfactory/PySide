@@ -1,0 +1,100 @@
+QWidget
+{
+    color: silver;
+    background-color: #302F2F;
+    selection-background-color:#3d8ec9;
+    selection-color: black;
+    background-clip: border;
+    border-image: none;
+    outline: 0;
+}
+
+/*
+QWidget:item:hover
+{
+    background-color: #78879b;
+    color: black;
+}*/
+
+QWidget:item:selected
+{
+    background-color: #3d8ec9;
+}
+
+QAbstractItemView
+{
+    /*alternate-background-color: #3A3939;*/
+    alternate-background-color: #272626;
+    color: silver;
+    border: 1px solid 3A3939;
+    border-radius: 2px;
+    padding: 1px;
+}
+
+QLineEdit
+{
+    background-color: #201F1F;
+    padding: 2px;
+    border-style: solid;
+    border: 1px solid #3A3939;
+    border-radius: 2px;
+    color: silver;
+}
+
+QTextEdit
+{
+    background-color: #201F1F;
+    color: silver;
+    border: 1px solid #3A3939;
+}
+
+QPlainTextEdit
+{
+    background-color: #201F1F;;
+    color: silver;
+    border-radius: 2px;
+    border: 1px solid #3A3939;
+}
+
+QHeaderView::section
+{
+    background-color: #3A3939;
+    color: silver;
+    padding-left: 4px;
+    border: 1px solid #6c6c6c;
+}
+
+QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(:/petfactoryIcons/rc/vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(:/petfactoryIcons/rc/branch-more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(:/petfactoryIcons/rc/branch-end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+        border-image: none;
+        image: url(:/petfactoryIcons/rc/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+        border-image: none;
+        image: url(:/petfactoryIcons/rc/branch-open.png);
+}
+
+QListView::item:!selected:hover, QListView::item:!selected:hover, QTreeView::item:!selected:hover  {
+    background: rgba(0, 0, 0, 0);
+    outline: 0;
+    color: #FFFFFF
+}
+
+QListView::item:selected:hover, QListView::item:selected:hover, QTreeView::item:selected:hover  {
+    background: #3d8ec9;
+    color: #FFFFFF;
+}

@@ -1,0 +1,6 @@
+QPushButton
+{
+    color: #FFFFFF;
+    background-color: #333333;
+    image: url(:/petfactoryIcons/rc/mario.png);
+}
