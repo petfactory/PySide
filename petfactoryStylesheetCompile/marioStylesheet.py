@@ -26,6 +26,7 @@ class BaseWin(QtGui.QWidget):
         self.treeview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
         self.treeview.setAlternatingRowColors(True)
         self.treeview.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.treeview.setHeaderHidden(True)
         vbox.addWidget(self.treeview)
 
         # model
