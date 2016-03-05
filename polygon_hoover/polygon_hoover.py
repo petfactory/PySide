@@ -75,11 +75,12 @@ class BaseWin(QtGui.QWidget):
 
         self.hit_dict = {}
 
-        self.setGeometry(50, 100, 500, 500)
+        self.setGeometry(20, 60, 500, 756)
         self.setWindowTitle('Test')
 
         # layout
         vbox = QtGui.QVBoxLayout(self)
+        vbox.setContentsMargins(0,0,0,0)
 
         self.scene = QtGui.QGraphicsScene()
     
