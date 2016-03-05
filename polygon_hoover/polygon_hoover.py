@@ -17,6 +17,7 @@ class MyPathItem(QtGui.QGraphicsPathItem):
         self.setOpacity(.2)
         self.name = name
         self.quick_groups = None
+        self.setToolTip(name)
 
     def hoverEnterEvent(self, event):
         #print('Enter: {}').format(self.name)
@@ -82,22 +83,22 @@ class BaseWin(QtGui.QWidget):
 
         self.scene = QtGui.QGraphicsScene()
     
-        #self.scene.addPixmap(QtGui.QPixmap('mario.png'))
+        self.scene.addPixmap(QtGui.QPixmap('mario_bw.jpg'))
 
         view = QtGui.QGraphicsView(self.scene)
-        view.setSceneRect(0,0,800,800)
+        view.setSceneRect(0,0,736,736)
         
         vbox.addWidget(view)
 
         self.load_paths()
 
-        mario_item = self.hit_dict.get('Mario')
-        if mario_item:
-            mario_item.add_quick_groups(['One', 'Two'])
+        pants_item = self.hit_dict.get('Pants')
+        if pants_item:
+            pants_item.add_quick_groups(['One', 'Two'])
 
-        toad_item = self.hit_dict.get('Toad')
-        if toad_item:
-            toad_item.add_quick_groups(['Three', 'Four', 'Five'])
+        hands_item = self.hit_dict.get('Hands')
+        if hands_item:
+            hands_item.add_quick_groups(['Three', 'Four', 'Five'])
 
 
     def load_paths(self):
@@ -127,8 +128,13 @@ class BaseWin(QtGui.QWidget):
 
         path = QtGui.QPainterPath()
         color = QtGui.QColor(color[0], color[1], color[2], 255)
-        polygon = [QtCore.QPoint(*p) for p in outer_pos]
-        path.addPolygon(polygon)
+
+        for pos in outer_pos:
+                polygon = [QtCore.QPoint(*p) for p in pos]
+                path.addPolygon(polygon)
+
+        #polygon = [QtCore.QPoint(*p) for p in outer_pos]
+        #path.addPolygon(polygon)
 
         if inner_pos:
             for pos in inner_pos:
