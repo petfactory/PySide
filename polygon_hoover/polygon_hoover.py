@@ -6,11 +6,13 @@ from PySide import QtGui, QtCore
 
 class MyPathItem(QtGui.QGraphicsPathItem):
 
-    def __init__(self, name):
+    def __init__(self, name, scene):
         super(MyPathItem, self).__init__()
         self.setAcceptHoverEvents(True)
         self.setOpacity(.2)
         self.name = name
+        self.scene = scene
+        self.quick_button = None
 
     def hoverEnterEvent(self, event):
         print('Enter: {}').format(self.name)
@@ -22,7 +24,28 @@ class MyPathItem(QtGui.QGraphicsPathItem):
         self.setOpacity(.2)
 
     def mousePressEvent(self, event):
-        print self.name
+
+        if self.quick_button:
+            self.quick_button.deleteLater()
+            self.quick_button = None
+
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if modifiers == QtCore.Qt.ShiftModifier:
+            print('Shift+Click')
+
+            self.quick_button = QtGui.QPushButton('Test')
+            x, y = event.scenePos().toTuple()
+            self.quick_button.move(x, y)
+            self.scene.addWidget(self.quick_button)
+
+        else:    
+            print self.name
+
+    def mouseReleaseEvent(self, event):
+
+        if self.quick_button:
+            self.quick_button.deleteLater()
+            self.quick_button = None
 
     def shape(self):
         return self.path()
@@ -73,7 +96,7 @@ class BaseWin(QtGui.QWidget):
             polygon = [QtCore.QPoint(*p) for p in inner_pos_list]
             path.addPolygon(polygon)
  
-        item = MyPathItem(name)
+        item = MyPathItem(name, scene)
         item.setPath(path)
         item.setBrush(QtGui.QBrush(color))
         item.setPen(QtGui.QPen(QtCore.Qt.NoPen))  
