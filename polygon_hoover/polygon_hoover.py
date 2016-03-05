@@ -39,8 +39,11 @@ class MyPathItem(QtGui.QGraphicsPathItem):
             print self.name
 
         else:
-            print 'Modifier press' 
-            
+            if modifiers == QtCore.Qt.ShiftModifier:
+                print 'Shift modifier used' 
+
+            else:
+                print 'Some modifier used' 
 
     def shape(self):
         return self.path()
@@ -68,6 +71,8 @@ class BaseWin(QtGui.QWidget):
     def __init__(self):
         super(BaseWin, self).__init__() 
 
+        self.hit_dict = {}
+
         self.setGeometry(50, 100, 300, 300)
         self.setWindowTitle('Test')
 
@@ -76,49 +81,57 @@ class BaseWin(QtGui.QWidget):
 
         self.scene = QtGui.QGraphicsScene()
     
-        self.scene.addPixmap(QtGui.QPixmap('mario.png'))
-
-        mario_item = self.add_hit_path( outer_pos_list=[(10,10), (90,10), (40,50), (10,50)],
-                                        name='Mario',
-                                        color=QtGui.QColor(255, 0, 0, 255),
-                                        scene=self.scene,
-                                        quick_groups=['Three', 'Four', 'Five'],
-                                        inner_pos_list=[(20,20), (60,20), (30,40), (20,40)])
+        #self.scene.addPixmap(QtGui.QPixmap('mario.png'))
 
 
-        toad_item = self.add_hit_path(  outer_pos_list=[(100,100), (200,100), (200,200), (100,200)],
-                                        name='Toad',
-                                        color=QtGui.QColor(0, 255, 135, 255),
-                                        scene=self.scene,
-                                        quick_groups=['One', 'Two'])
+        self.add_hit_path(  outer_pos=[(10,10), (90,10), (40,50), (10,50)],
+                            name='Mario',
+                            color=(255, 0, 0),
+                            scene=self.scene,
+                            inner_pos=[[(20,20), (60,20), (30,40), (20,40)]])
 
-        toad_item.add_quick_groups()
 
+        self.add_hit_path(  outer_pos=[(100,100), (200,100), (200,200), (100,200)],
+                            name='Toad',
+                            color=(0, 255, 135),
+                            scene=self.scene,
+                            inner_pos=[ [(110,110), (130,110), (130,130), (110,130)],
+                                        [(170,170), (190,170), (190,190), (170,190)],
+                                        [(150,110), (190,110), (190,130), (150,130)]])
+
+        mario_item = self.hit_dict.get('Mario')
+        if mario_item:
+            mario_item.add_quick_groups(['One', 'Two'])
+
+        toad_item = self.hit_dict.get('Toad')
+        if toad_item:
+            toad_item.add_quick_groups(['Three', 'Four', 'Five'])
 
         view = QtGui.QGraphicsView(self.scene)
         view.setSceneRect(0,0,300,300)
         
         vbox.addWidget(view)
 
-    def add_hit_path(self, outer_pos_list, name, color, scene, quick_groups=None, inner_pos_list=None):
+    def add_hit_path(self, outer_pos, name, color, scene, quick_groups=None, inner_pos=None):
 
         path = QtGui.QPainterPath()
-
-        polygon = [QtCore.QPoint(*p) for p in outer_pos_list]
+        color = QtGui.QColor(color[0], color[1], color[2], 255)
+        polygon = [QtCore.QPoint(*p) for p in outer_pos]
         path.addPolygon(polygon)
 
-        if inner_pos_list:
-            polygon = [QtCore.QPoint(*p) for p in inner_pos_list]
-            path.addPolygon(polygon)
+        if inner_pos:
+            for pos in inner_pos:
+                polygon = [QtCore.QPoint(*p) for p in pos]
+                path.addPolygon(polygon)
  
-        item = MyPathItem(name, quick_groups)
+        item = MyPathItem(name=name, quick_groups=quick_groups)
         item.setPath(path)
         item.setBrush(QtGui.QBrush(color))
         item.setPen(QtGui.QPen(QtCore.Qt.NoPen))  
-
         scene.addItem(item)
 
-        return item
+        self.hit_dict[name] = item
+
 
 def main():
     
