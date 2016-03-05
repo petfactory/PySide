@@ -103,7 +103,7 @@ class BaseWin(QtGui.QWidget):
 
     def load_paths(self):
         dirName = os.path.dirname(os.path.realpath(__file__))
-        jsonPath = os.path.join(dirName, r'paths.json')
+        jsonPath = os.path.join(dirName, r'paths2.json')
 
         with open(jsonPath, 'r') as f:
             data = f.read()
