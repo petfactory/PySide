@@ -4,18 +4,19 @@
 import sys
 from functools import partial
 from PySide import QtGui, QtCore
+import json, os
 
 def apa(name):
     print name
 
 class MyPathItem(QtGui.QGraphicsPathItem):
 
-    def __init__(self, name, quick_groups=None):
+    def __init__(self, name):
         super(MyPathItem, self).__init__()
         self.setAcceptHoverEvents(True)
         self.setOpacity(.2)
         self.name = name
-        self.quick_groups = quick_groups
+        self.quick_groups = None
 
     def hoverEnterEvent(self, event):
         #print('Enter: {}').format(self.name)
@@ -73,7 +74,7 @@ class BaseWin(QtGui.QWidget):
 
         self.hit_dict = {}
 
-        self.setGeometry(50, 100, 300, 300)
+        self.setGeometry(50, 100, 500, 500)
         self.setWindowTitle('Test')
 
         # layout
@@ -83,21 +84,12 @@ class BaseWin(QtGui.QWidget):
     
         #self.scene.addPixmap(QtGui.QPixmap('mario.png'))
 
+        view = QtGui.QGraphicsView(self.scene)
+        view.setSceneRect(0,0,800,800)
+        
+        vbox.addWidget(view)
 
-        self.add_hit_path(  outer_pos=[(10,10), (90,10), (40,50), (10,50)],
-                            name='Mario',
-                            color=(255, 0, 0),
-                            scene=self.scene,
-                            inner_pos=[[(20,20), (60,20), (30,40), (20,40)]])
-
-
-        self.add_hit_path(  outer_pos=[(100,100), (200,100), (200,200), (100,200)],
-                            name='Toad',
-                            color=(0, 255, 135),
-                            scene=self.scene,
-                            inner_pos=[ [(110,110), (130,110), (130,130), (110,130)],
-                                        [(170,170), (190,170), (190,190), (170,190)],
-                                        [(150,110), (190,110), (190,130), (150,130)]])
+        self.load_paths()
 
         mario_item = self.hit_dict.get('Mario')
         if mario_item:
@@ -107,12 +99,31 @@ class BaseWin(QtGui.QWidget):
         if toad_item:
             toad_item.add_quick_groups(['Three', 'Four', 'Five'])
 
-        view = QtGui.QGraphicsView(self.scene)
-        view.setSceneRect(0,0,300,300)
-        
-        vbox.addWidget(view)
 
-    def add_hit_path(self, outer_pos, name, color, scene, quick_groups=None, inner_pos=None):
+    def load_paths(self):
+        dirName = os.path.dirname(os.path.realpath(__file__))
+        jsonPath = os.path.join(dirName, r'paths.json')
+
+        with open(jsonPath, 'r') as f:
+            data = f.read()
+            jsonData = json.loads(data)
+            #print jsonData
+
+            for name, info_dict in jsonData.iteritems():
+
+                path_outer = info_dict.get('path_outer')
+                path_inner = info_dict.get('path_inner')
+                color = info_dict.get('color')
+
+                self.add_hit_path(  outer_pos=path_outer,
+                                    name=name,
+                                    color=color,
+                                    scene=self.scene,
+                                    inner_pos=path_inner)
+
+
+
+    def add_hit_path(self, outer_pos, name, color, scene, inner_pos=None):
 
         path = QtGui.QPainterPath()
         color = QtGui.QColor(color[0], color[1], color[2], 255)
@@ -124,7 +135,7 @@ class BaseWin(QtGui.QWidget):
                 polygon = [QtCore.QPoint(*p) for p in pos]
                 path.addPolygon(polygon)
  
-        item = MyPathItem(name=name, quick_groups=quick_groups)
+        item = MyPathItem(name=name)
         item.setPath(path)
         item.setBrush(QtGui.QBrush(color))
         item.setPen(QtGui.QPen(QtCore.Qt.NoPen))  
