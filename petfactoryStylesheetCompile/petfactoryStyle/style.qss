@@ -1,7 +1,7 @@
 QWidget
 {
-    color: silver;
-    background-color: #302F2F;
+    color: #e4e4e4;
+    background-color: #575757;
     selection-background-color:#3d8ec9;
     selection-color: black;
     background-clip: border;
@@ -23,9 +23,7 @@ QWidget:item:selected
 
 QAbstractItemView
 {
-    /*alternate-background-color: #3A3939;*/
-    alternate-background-color: #272626;
-    color: silver;
+    alternate-background-color: #606060;
     border: 1px solid 3A3939;
     border-radius: 2px;
     padding: 1px;
@@ -64,6 +62,11 @@ QHeaderView::section
     border: 1px solid #6c6c6c;
 }
 
+QTreeView::item {
+     height: 22px;
+}
+
+
 QTreeView::branch:has-siblings:!adjoins-item {
     border-image: url(:/petfactoryIcons/rc/vline.png) 0;
 }
@@ -76,13 +79,21 @@ QTreeView::branch:!has-children:!has-siblings:adjoins-item {
     border-image: url(:/petfactoryIcons/rc/branch-end.png) 0;
 }
 
-QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:has-children:!has-siblings:closed {
+        border-image: none;
+        image: url(:/petfactoryIcons/rc/branch-closed-end.png);
+}
+
 QTreeView::branch:closed:has-children:has-siblings {
         border-image: none;
         image: url(:/petfactoryIcons/rc/branch-closed.png);
 }
 
-QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:!has-siblings {
+        border-image: none;
+        image: url(:/petfactoryIcons/rc/branch-open-end.png);
+}
+
 QTreeView::branch:open:has-children:has-siblings  {
         border-image: none;
         image: url(:/petfactoryIcons/rc/branch-open.png);
@@ -91,7 +102,7 @@ QTreeView::branch:open:has-children:has-siblings  {
 QListView::item:!selected:hover, QListView::item:!selected:hover, QTreeView::item:!selected:hover  {
     background: rgba(0, 0, 0, 0);
     outline: 0;
-    color: #FFFFFF
+    color: #FFFFFF;
 }
 
 QListView::item:selected:hover, QListView::item:selected:hover, QTreeView::item:selected:hover  {

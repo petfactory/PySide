@@ -1,7 +1,9 @@
 <RCC>
   <qresource prefix="petfactoryIcons">
-  	<file>rc/branch-open.png</file>
+    <file>rc/branch-open.png</file>
+    <file>rc/branch-open-end.png</file>
     <file>rc/branch-closed.png</file>
+    <file>rc/branch-closed-end.png</file>
     <file>rc/branch-more.png</file>
     <file>rc/branch-end.png</file>
     <file>rc/vline.png</file>
