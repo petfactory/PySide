@@ -15,7 +15,7 @@ class BaseWin(QtGui.QWidget):
     def __init__(self):
         super(BaseWin, self).__init__() 
 
-        self.setGeometry(20, 60, 300, 400)
+        self.setGeometry(20, 60, 300, 200)
         self.setWindowTitle('Test')
 
         # layout

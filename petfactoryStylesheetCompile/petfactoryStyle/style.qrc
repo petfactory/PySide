@@ -7,6 +7,8 @@
     <file>rc/branch-more.png</file>
     <file>rc/branch-end.png</file>
     <file>rc/vline.png</file>
+    <file>rc/arrow-up.png</file>
+    <file>rc/arrow-down.png</file>
   </qresource>
   <qresource prefix="petfactoryStyle">
       <file>style.qss</file>

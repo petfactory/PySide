@@ -109,3 +109,64 @@ QListView::item:selected:hover, QListView::item:selected:hover, QTreeView::item:
     background: #3d8ec9;
     color: #FFFFFF;
 }
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Scrollbar
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+QScrollBar:vertical {
+     border: 2px solid #333;
+     background: #333;
+     width: 13px;
+     margin: 18px 0 18px 0;
+}
+
+
+QScrollBar::handle:vertical {
+     background: #888;
+     min-height: 20px;
+     margin: 0px;
+     border-radius: 2px;
+}
+
+QScrollBar::handle:vertical:hover {
+     background: #999;
+}
+
+
+/* arrow bg: bottom */
+
+QScrollBar::add-line:vertical {
+     height: 16px;
+     subcontrol-position: bottom;
+     subcontrol-origin: margin;
+     background: #333;
+}
+
+
+/* arrow bg: top */
+QScrollBar::sub-line:vertical {
+     height: 16px;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+     background: #333;
+}
+
+QScrollBar::up-arrow:vertical {
+     width: 12px;
+     background: #333;
+     image: url(:/petfactoryIcons/rc/arrow-up.png) 0;
+}
+
+
+QScrollBar::down-arrow:vertical {
+     width: 12px;
+     background: #333;
+     image: url(:/petfactoryIcons/rc/arrow-down.png) 0;
+}
+
+ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+ }
