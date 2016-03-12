@@ -5,6 +5,13 @@ import sys, os
 from PySide import QtGui, QtCore
 import petfactoryStyle
 
+        
+class ParentItem(QtGui.QStandardItem):
+    pass
+
+class ChildItem(QtGui.QStandardItem):
+    pass
+
 
 #class BaseWin(QtGui.QWidget):
 class BaseWin(QtGui.QMainWindow):
@@ -51,9 +58,56 @@ class BaseWin(QtGui.QMainWindow):
         splitter.addWidget(self.treeview)
         splitter.addWidget(view)
 
-        #self.load_assets(self.resource_path('./assets'))
+        self.load_assets(self.resource_path('./assets'))
 
-        #self.dir_btn_clicked()
+        self.treeview.installEventFilter(self)
+
+
+    def eventFilter(self, widget, event):
+
+        if event.type() == QtCore.QEvent.KeyPress:
+            key = event.key()
+
+            if key == QtCore.Qt.Key_Space:
+                print('space')
+                index = self.treeview.selectedIndexes()[0]
+
+                item = self.model.itemFromIndex(index)
+
+                if not isinstance(item, ParentItem):
+                    return True
+
+                if not item.hasChildren():
+                    return
+
+                curr_sel = None
+                num_rows = item.rowCount()
+
+                if num_rows < 2:
+                    return True
+
+                for row in range(num_rows):
+                    if item.child(row).checkState() == QtCore.Qt.CheckState.Checked:
+                        curr_sel = row
+                        break
+
+                new_sel = (curr_sel+1) % num_rows
+                
+                item.child(curr_sel).setCheckState(QtCore.Qt.CheckState.Unchecked)
+                item.child(new_sel).setCheckState(QtCore.Qt.CheckState.Checked)
+
+                return True
+
+            else:
+                if key == QtCore.Qt.Key_Return:
+                    self.edit.setText('return')
+                elif key == QtCore.Qt.Key_Enter:
+                    self.edit.setText('enter')
+                return False
+                
+
+        return QtGui.QWidget.eventFilter(self, widget, event)
+
 
     def open_dir(self):
         selected_directory = QtGui.QFileDialog.getExistingDirectory()
@@ -90,13 +144,16 @@ class BaseWin(QtGui.QMainWindow):
 
         for layer_name, child_list in self.layer_dict.iteritems():
             
-            parent_item = QtGui.QStandardItem(layer_name)
+            parent_item = ParentItem(layer_name)
             parent_item.setCheckable(True)
             self.model.setItem(self.model.rowCount(), 0, parent_item)
 
-            for child in child_list:
-                child_item = QtGui.QStandardItem(child)
+            for index, child in enumerate(child_list):
+                child_item = ChildItem(child)
                 child_item.setCheckable(True)
+                if index == 0:
+                    child_item.setCheckState(QtCore.Qt.CheckState.Checked)
+
                 parent_item.appendRow(child_item)
 
 
