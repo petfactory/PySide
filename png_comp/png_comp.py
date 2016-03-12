@@ -112,19 +112,23 @@ class BaseWin(QtGui.QMainWindow):
          numRows = model.rowCount()
          for row in range(numRows):
              model.removeRow(0)
+             print 12
 
     def open_dir(self):
         
         selected_directory = QtGui.QFileDialog.getExistingDirectory()
         if selected_directory:
-            self.cleanModel(self.model)
             self.load_assets(selected_directory)
 
 
     def load_assets(self, path):
+
         if not os.path.isdir(path):
             print('The directory dose not exist!')
             return
+
+        self.cleanModel(self.model)
+        self.layer_dict = {}
 
         dir_list = [p for p in os.listdir(path) if os.path.isdir(os.path.join(path, p))]
         z_value = 0
@@ -202,7 +206,7 @@ class BaseWin(QtGui.QMainWindow):
             else:
                 self.scene.removeItem(pixmap_item)
 
-
+    '''
     def add_items(self):
 
         self.model.blockSignals(True)
@@ -217,6 +221,7 @@ class BaseWin(QtGui.QMainWindow):
             self.model.setItem(row, 0, item)
 
         self.model.blockSignals(False)
+    '''
 
 
 
