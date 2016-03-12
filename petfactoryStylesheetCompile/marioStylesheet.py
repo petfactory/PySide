@@ -38,7 +38,7 @@ class BaseWin(QtGui.QWidget):
 
     def cleanModel(self):
          numRows = self.model.rowCount()
-         for row in range(numRows):
+         for row in range(numRo	ws):
              self.model.removeRow(0)
 
     def create_item_recurse(self, xml_node, parent_item):
