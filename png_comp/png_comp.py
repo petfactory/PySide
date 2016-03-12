@@ -6,7 +6,8 @@ from PySide import QtGui, QtCore
 import petfactoryStyle
 
 
-class BaseWin(QtGui.QWidget):
+#class BaseWin(QtGui.QWidget):
+class BaseWin(QtGui.QMainWindow):
     
     def __init__(self):
         super(BaseWin, self).__init__() 
@@ -15,9 +16,22 @@ class BaseWin(QtGui.QWidget):
         self.setWindowTitle('Test')
 
         self.layer_dict = {}
-        #self.image_dict['blue'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('blue.png')))
-        #self.image_dict['green'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('green.png')))
-        #self.image_dict['red'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('red.png')))
+
+        '''
+        exitAction = QtGui.QAction('Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(self.close)
+        '''
+
+        open_action = QtGui.QAction('Open', self)
+        open_action.setShortcut('Ctrl+O')
+        open_action.setStatusTip('Open directory')
+        open_action.triggered.connect(self.open_dir)
+
+        self.toolbar = self.addToolBar('Open')
+        self.toolbar.addAction(open_action)
+
 
         self.scene = QtGui.QGraphicsScene()
     
@@ -25,22 +39,27 @@ class BaseWin(QtGui.QWidget):
         self.model.itemChanged.connect(self.item_changed)
 
         self.treeview = QtGui.QTreeView()
-        #header = self.treeview.horizontalHeader()
-        #header.setStretchLastSection(True)
-        #self.tableview.setAlternatingRowColors(True)
         self.treeview.setModel(self.model)
-        #self.tableview.clicked.connect(self.tableview_clicked)
-        #self.add_items()
         self.model.setHorizontalHeaderLabels(['Layers'])
 
         view = QtGui.QGraphicsView(self.scene)
         view.setSceneRect(0,0,800,600)        
 
         splitter = QtGui.QSplitter(self)
+        self.setCentralWidget(splitter)
+
         splitter.addWidget(self.treeview)
         splitter.addWidget(view)
 
-        self.load_assets(self.resource_path('./assets'))
+        #self.load_assets(self.resource_path('./assets'))
+
+        #self.dir_btn_clicked()
+
+    def open_dir(self):
+        selected_directory = QtGui.QFileDialog.getExistingDirectory()
+        if selected_directory:
+            self.load_assets(selected_directory)
+
 
     def load_assets(self, path):
         if not os.path.isdir(path):
