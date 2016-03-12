@@ -13,10 +13,10 @@ class BaseWin(QtGui.QWidget):
         self.setGeometry(5, 50, 600, 500)
         self.setWindowTitle('Test')
 
-        self.image_dict = {}
-        self.image_dict['blue'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('blue.png')))
-        self.image_dict['green'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('green.png')))
-        self.image_dict['red'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('red.png')))
+        self.layer_dict = {}
+        #self.image_dict['blue'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('blue.png')))
+        #self.image_dict['green'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('green.png')))
+        #self.image_dict['red'] = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path('red.png')))
 
         self.scene = QtGui.QGraphicsScene()
     
@@ -29,7 +29,7 @@ class BaseWin(QtGui.QWidget):
         #self.tableview.setAlternatingRowColors(True)
         self.tableview.setModel(self.model)
         #self.tableview.clicked.connect(self.tableview_clicked)
-        self.add_items()
+        #self.add_items()
         self.model.setHorizontalHeaderLabels(['Layers'])
 
         view = QtGui.QGraphicsView(self.scene)
@@ -38,6 +38,39 @@ class BaseWin(QtGui.QWidget):
         splitter = QtGui.QSplitter(self)
         splitter.addWidget(self.tableview)
         splitter.addWidget(view)
+
+        self.load_assets('./assets')
+
+    def load_assets(self, path):
+        if not os.path.isdir(path):
+            print('The directory dose not exist!')
+            return
+
+        dir_list = [p for p in os.listdir(path) if os.path.isdir(os.path.join(path, p))]
+
+        #print dir_list
+
+        for dir in dir_list:
+
+            layer_list = []
+            self.layer_dict[dir] = layer_list
+
+            file_path = os.path.join(path, dir)
+            files_list = [f for f in os.listdir(file_path) if os.path.isfile(os.path.join(file_path, f))]
+            #print files_list
+
+            for file in files_list:
+
+                layer_list.append(file)
+
+
+        for layer_name, content in self.layer_dict.iteritems():
+            #print (layer_name, content)
+            item = QtGui.QStandardItem(layer_name)
+            item.setCheckable(True)
+            self.model.setItem(self.model.rowCount(), 0, item)
+
+
 
     def resource_path(self, relative_path):
         """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -51,6 +84,10 @@ class BaseWin(QtGui.QWidget):
 
     def item_changed(self, item):
 
+        contents = self.layer_dict.get(item.text())
+        print contents
+
+        '''
         z_value = item.row()
         pixmapItem = self.image_dict.get(item.text())
         if not pixmapItem:
@@ -61,6 +98,7 @@ class BaseWin(QtGui.QWidget):
             self.scene.addItem(pixmapItem)
         else:
             self.scene.removeItem(pixmapItem)
+        '''
 
 
     def add_items(self):
