@@ -228,7 +228,7 @@ class BaseWin(QtGui.QMainWindow):
 def main():
     
     app = QtGui.QApplication(sys.argv)
-    #app.setStyleSheet(petfactoryStyle.load_stylesheet())
+    app.setStyleSheet(petfactoryStyle.load_stylesheet())
     baseWin = BaseWin()
     baseWin.show()
     sys.exit(app.exec_())

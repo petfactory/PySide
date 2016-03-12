@@ -26,7 +26,7 @@ class BaseWin(QtGui.QWidget):
         self.treeview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
         self.treeview.setAlternatingRowColors(True)
         self.treeview.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.treeview.setHeaderHidden(True)
+        #self.treeview.setHeaderHidden(True)
         vbox.addWidget(self.treeview)
 
         # model
@@ -38,7 +38,7 @@ class BaseWin(QtGui.QWidget):
 
     def cleanModel(self):
          numRows = self.model.rowCount()
-         for row in range(numRo	ws):
+         for row in range(numRows):
              self.model.removeRow(0)
 
     def create_item_recurse(self, xml_node, parent_item):
