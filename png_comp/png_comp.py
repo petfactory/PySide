@@ -3,6 +3,7 @@
 
 import sys, os
 from PySide import QtGui, QtCore
+import petfactoryStyle
 
 
 class BaseWin(QtGui.QWidget):
@@ -23,11 +24,11 @@ class BaseWin(QtGui.QWidget):
         self.model = QtGui.QStandardItemModel()
         self.model.itemChanged.connect(self.item_changed)
 
-        self.tableview = QtGui.QTableView()
-        header = self.tableview.horizontalHeader()
-        header.setStretchLastSection(True)
+        self.treeview = QtGui.QTreeView()
+        #header = self.treeview.horizontalHeader()
+        #header.setStretchLastSection(True)
         #self.tableview.setAlternatingRowColors(True)
-        self.tableview.setModel(self.model)
+        self.treeview.setModel(self.model)
         #self.tableview.clicked.connect(self.tableview_clicked)
         #self.add_items()
         self.model.setHorizontalHeaderLabels(['Layers'])
@@ -36,10 +37,10 @@ class BaseWin(QtGui.QWidget):
         view.setSceneRect(0,0,800,600)        
 
         splitter = QtGui.QSplitter(self)
-        splitter.addWidget(self.tableview)
+        splitter.addWidget(self.treeview)
         splitter.addWidget(view)
 
-        self.load_assets('./assets')
+        self.load_assets(self.resource_path('./assets'))
 
     def load_assets(self, path):
         if not os.path.isdir(path):
@@ -47,28 +48,37 @@ class BaseWin(QtGui.QWidget):
             return
 
         dir_list = [p for p in os.listdir(path) if os.path.isdir(os.path.join(path, p))]
-
+        z_value = 0
         #print dir_list
 
         for dir in dir_list:
 
-            layer_list = []
-            self.layer_dict[dir] = layer_list
+            sub_layer_dict = {}
+            self.layer_dict[dir] = sub_layer_dict
 
-            file_path = os.path.join(path, dir)
-            files_list = [f for f in os.listdir(file_path) if os.path.isfile(os.path.join(file_path, f))]
+            dir_path = os.path.join(path, dir)
+            #print dir_path
+            files_list = [os.path.join(dir_path, f) for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
             #print files_list
 
             for file in files_list:
+                base = os.path.basename(file)
+                z_value += 1
+                sub_layer_dict[base] = {    'path':QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path(file))),
+                                            'z_value': z_value
+                                        }
 
-                layer_list.append(file)
 
+        for layer_name, child_list in self.layer_dict.iteritems():
+            
+            parent_item = QtGui.QStandardItem(layer_name)
+            parent_item.setCheckable(True)
+            self.model.setItem(self.model.rowCount(), 0, parent_item)
 
-        for layer_name, content in self.layer_dict.iteritems():
-            #print (layer_name, content)
-            item = QtGui.QStandardItem(layer_name)
-            item.setCheckable(True)
-            self.model.setItem(self.model.rowCount(), 0, item)
+            for child in child_list:
+                child_item = QtGui.QStandardItem(child)
+                child_item.setCheckable(True)
+                parent_item.appendRow(child_item)
 
 
 
@@ -85,20 +95,30 @@ class BaseWin(QtGui.QWidget):
     def item_changed(self, item):
 
         contents = self.layer_dict.get(item.text())
-        print contents
 
-        '''
-        z_value = item.row()
-        pixmapItem = self.image_dict.get(item.text())
-        if not pixmapItem:
-            return
+        if contents is None:
+            
+            sub_layer_dict = self.layer_dict.get(item.parent().text())
 
-        if item.checkState() == QtCore.Qt.CheckState.Checked:
-            pixmapItem.setZValue(z_value)
-            self.scene.addItem(pixmapItem)
-        else:
-            self.scene.removeItem(pixmapItem)
-        '''
+            if sub_layer_dict is None:
+                return
+
+            info_dict = sub_layer_dict.get(item.text())
+
+            pixmap_item = info_dict.get('path')
+            z_value = info_dict.get('z_value')
+
+            if pixmap_item is None:
+                return
+
+            #z_value = item.row()
+            #print z_value
+
+            if item.checkState() == QtCore.Qt.CheckState.Checked:
+                pixmap_item.setZValue(z_value)
+                self.scene.addItem(pixmap_item)
+            else:
+                self.scene.removeItem(pixmap_item)
 
 
     def add_items(self):
@@ -121,6 +141,7 @@ class BaseWin(QtGui.QWidget):
 def main():
     
     app = QtGui.QApplication(sys.argv)
+    #app.setStyleSheet(petfactoryStyle.load_stylesheet())
     baseWin = BaseWin()
     baseWin.show()
     sys.exit(app.exec_())
