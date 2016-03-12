@@ -108,10 +108,16 @@ class BaseWin(QtGui.QMainWindow):
 
         return QtGui.QWidget.eventFilter(self, widget, event)
 
+    def cleanModel(self, model):
+         numRows = model.rowCount()
+         for row in range(numRows):
+             model.removeRow(0)
 
     def open_dir(self):
+        
         selected_directory = QtGui.QFileDialog.getExistingDirectory()
         if selected_directory:
+            self.cleanModel(self.model)
             self.load_assets(selected_directory)
 
 
