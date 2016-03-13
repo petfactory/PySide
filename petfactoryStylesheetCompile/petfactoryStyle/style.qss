@@ -252,3 +252,22 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
      background: none;
 }
 
+
+
+
+QTreeView::indicator {
+    width: 20px;
+    height: 20px;
+    margin-left: -4px;
+}
+
+QTreeView::indicator:unchecked {
+    image: url(:/petfactoryIcons/rc/checkbox-unchecked.png);
+}
+
+QTreeView::indicator:checked {
+    image: url(:/petfactoryIcons/rc/checkbox-checked.png);
+}
+
+
+

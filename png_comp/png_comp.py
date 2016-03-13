@@ -46,7 +46,9 @@ class BaseWin(QtGui.QMainWindow):
         self.model.itemChanged.connect(self.item_changed)
 
         self.treeview = QtGui.QTreeView()
+        self.treeview.setHeaderHidden(True)
         self.treeview.setModel(self.model)
+        self.treeview.setAlternatingRowColors(True)
         self.model.setHorizontalHeaderLabels(['Layers'])
 
         view = QtGui.QGraphicsView(self.scene)
@@ -112,7 +114,6 @@ class BaseWin(QtGui.QMainWindow):
          numRows = model.rowCount()
          for row in range(numRows):
              model.removeRow(0)
-             print 12
 
     def open_dir(self):
         
@@ -131,32 +132,31 @@ class BaseWin(QtGui.QMainWindow):
         self.layer_dict = {}
 
         dir_list = [p for p in os.listdir(path) if os.path.isdir(os.path.join(path, p))]
-        z_value = 0
-        #print dir_list
 
-        for dir in dir_list:
+        for index, dir in enumerate(sorted(dir_list)):
 
             sub_layer_dict = {}
             self.layer_dict[dir] = sub_layer_dict
 
             dir_path = os.path.join(path, dir)
-            #print dir_path
+            
             files_list = [os.path.join(dir_path, f) for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
-            #print files_list
 
             for file in files_list:
                 base = os.path.basename(file)
-                z_value += 1
                 sub_layer_dict[base] = {    'path':QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path(file))),
-                                            'z_value': z_value
+                                            'z_value': index
                                         }
 
+        key_list = self.layer_dict.keys()
 
-        for layer_name, child_list in self.layer_dict.iteritems():
+        #for layer_name, child_list in self.layer_dict.iteritems():
+        for key in sorted(key_list):
             
-            parent_item = ParentItem(layer_name)
+            parent_item = ParentItem(key)
             parent_item.setCheckable(True)
             self.model.setItem(self.model.rowCount(), 0, parent_item)
+            child_list = self.layer_dict.get(key)
 
             for index, child in enumerate(child_list):
                 child_item = ChildItem(child)
