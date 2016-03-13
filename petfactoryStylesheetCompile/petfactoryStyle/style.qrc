@@ -9,6 +9,8 @@
     <file>rc/vline.png</file>
     <file>rc/arrow-up.png</file>
     <file>rc/arrow-down.png</file>
+    <file>rc/checkbox-unchecked.png</file>
+    <file>rc/checkbox-checked.png</file>
   </qresource>
   <qresource prefix="petfactoryStyle">
       <file>style.qss</file>

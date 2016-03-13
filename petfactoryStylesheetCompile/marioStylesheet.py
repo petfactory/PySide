@@ -45,6 +45,8 @@ class BaseWin(QtGui.QWidget):
 
         name = xml_node.get('name')
         item = QtGui.QStandardItem(name)
+        item.setCheckable(True)
+        item.setCheckState(QtCore.Qt.CheckState.Checked)
 
         parent_item.appendRow(item)
 

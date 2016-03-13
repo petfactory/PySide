@@ -242,13 +242,13 @@ QScrollBar::left-arrow:horizontal {
      image: url(:/petfactoryIcons/rc/arrow-up.png) 0;
 }
 
-
 QScrollBar::right-arrow:horizontal {
      height: 12px;
      background: #333;
      image: url(:/petfactoryIcons/rc/arrow-down.png) 0;
 }
 
- QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
      background: none;
- }
+}
+
