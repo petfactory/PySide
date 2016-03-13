@@ -31,7 +31,9 @@ class BaseWin(QtGui.QMainWindow):
         exitAction.triggered.connect(self.close)
         '''
 
-        open_action = QtGui.QAction('Open', self)
+        #exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self) 
+        #open_action = QtGui.QAction('Open', self)
+        open_action = QtGui.QAction(QtGui.QIcon('open.png'), '&Open', self)
         open_action.setShortcut('Ctrl+O')
         open_action.setStatusTip('Open directory')
         open_action.triggered.connect(self.open_dir)
