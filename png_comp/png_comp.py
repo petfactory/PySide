@@ -1,6 +1,14 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+'''
+TODO:
+
+fix splitter image
+fix toolbar drag icon
+reorder parent layers, adjust z_index
+only load .png, .jpeg, .jpg
+'''
 import sys, os
 from PySide import QtGui, QtCore
 import petfactoryStyle
@@ -53,14 +61,30 @@ class BaseWin(QtGui.QMainWindow):
         self.treeview.setAlternatingRowColors(True)
         self.model.setHorizontalHeaderLabels(['Layers'])
 
-        view = QtGui.QGraphicsView(self.scene)
-        view.setSceneRect(0,0,800,600)        
+        self.view = QtGui.QGraphicsView(self.scene)
+        self.view.setSceneRect(0,0,800,600)        
 
         splitter = QtGui.QSplitter(self)
         self.setCentralWidget(splitter)
 
-        splitter.addWidget(self.treeview)
-        splitter.addWidget(view)
+        left_frame = QtGui.QFrame()
+        left_vbox = QtGui.QVBoxLayout(left_frame)
+        left_vbox.addWidget(self.treeview)
+        layer_order_hbox = QtGui.QHBoxLayout()
+        move_layer_up_button = QtGui.QPushButton('Up')
+        move_layer_down_button = QtGui.QPushButton('Down')
+        layer_order_hbox.addWidget(move_layer_up_button)
+        layer_order_hbox.addWidget(move_layer_down_button)
+
+        left_vbox.addLayout(layer_order_hbox)
+        splitter.addWidget(left_frame)
+        
+        right_frame = QtGui.QFrame()
+        right_vbox = QtGui.QVBoxLayout(right_frame)
+        right_vbox.addWidget(self.view)
+        splitter.addWidget(right_frame)
+
+
 
         self.load_assets(self.resource_path('./assets'))
 
@@ -113,9 +137,13 @@ class BaseWin(QtGui.QMainWindow):
         return QtGui.QWidget.eventFilter(self, widget, event)
 
     def cleanModel(self, model):
-         numRows = model.rowCount()
-         for row in range(numRows):
-             model.removeRow(0)
+        
+        for item in self.scene.items():
+            self.scene.removeItem(item)
+
+        numRows = model.rowCount()
+        for row in range(numRows):
+            model.removeRow(0)
 
     def open_dir(self):
         
