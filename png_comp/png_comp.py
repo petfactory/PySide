@@ -134,9 +134,8 @@ class BaseWin(QtGui.QMainWindow):
             key = event.key()
 
             if key == QtCore.Qt.Key_Space:
-                print('space')
-                index = self.treeview.selectedIndexes()[0]
 
+                index = self.treeview.selectedIndexes()[0]
                 item = self.model.itemFromIndex(index)
 
                 if not isinstance(item, ParentItem):
@@ -148,28 +147,27 @@ class BaseWin(QtGui.QMainWindow):
                 curr_sel = None
                 num_rows = item.rowCount()
 
-                if num_rows < 2:
-                    return True
 
-                for row in range(num_rows):
-                    if item.child(row).checkState() == QtCore.Qt.CheckState.Checked:
-                        curr_sel = row
-                        break
+                if num_rows == 1:
+                    child = item.child(0)
+                    if child.checkState() == QtCore.Qt.CheckState.Checked:
+                        child.setCheckState(QtCore.Qt.CheckState.Unchecked)
+                    else:
+                        child.setCheckState(QtCore.Qt.CheckState.Checked)
 
-                new_sel = (curr_sel+1) % num_rows
-                
-                item.child(curr_sel).setCheckState(QtCore.Qt.CheckState.Unchecked)
-                item.child(new_sel).setCheckState(QtCore.Qt.CheckState.Checked)
+                elif num_rows > 1:
 
-                return True
+                    for row in range(num_rows):
+                        if item.child(row).checkState() == QtCore.Qt.CheckState.Checked:
+                            curr_sel = row
+                            break
 
-            else:
-                if key == QtCore.Qt.Key_Return:
-                    self.edit.setText('return')
-                elif key == QtCore.Qt.Key_Enter:
-                    self.edit.setText('enter')
-                return False
-                
+                    new_sel = (curr_sel+1) % num_rows
+                    
+                    item.child(curr_sel).setCheckState(QtCore.Qt.CheckState.Unchecked)
+                    item.child(new_sel).setCheckState(QtCore.Qt.CheckState.Checked)
+
+                return True                
 
         return QtGui.QWidget.eventFilter(self, widget, event)
 
@@ -221,15 +219,24 @@ class BaseWin(QtGui.QMainWindow):
         for key in sorted(key_list):
             
             parent_item = ParentItem(key)
+            parent_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+
             parent_item.setCheckable(True)
             self.model.setItem(self.model.rowCount(), 0, parent_item)
             child_list = self.layer_dict.get(key)
 
             for index, child in enumerate(child_list):
                 child_item = ChildItem(child)
+                child_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+
                 child_item.setCheckable(True)
                 if index == 0:
                     child_item.setCheckState(QtCore.Qt.CheckState.Checked)
+                    pixmap_item =  child_list[child].get('path')
+                    z_value = child_list[child].get('z_value')
+                    pixmap_item.setZValue(z_value)
+                    self.scene.addItem(pixmap_item)
+
 
                 parent_item.appendRow(child_item)
 
@@ -264,33 +271,11 @@ class BaseWin(QtGui.QMainWindow):
             if pixmap_item is None:
                 return
 
-            #z_value = item.row()
-            #print z_value
-
             if item.checkState() == QtCore.Qt.CheckState.Checked:
                 pixmap_item.setZValue(z_value)
                 self.scene.addItem(pixmap_item)
             else:
                 self.scene.removeItem(pixmap_item)
-
-    '''
-    def add_items(self):
-
-        self.model.blockSignals(True)
-
-        name_list = ['blue', 'green', 'red']
-
-        for row, item in enumerate(name_list):
-
-            item = QtGui.QStandardItem(item)
-            
-            item.setCheckable(True)
-            self.model.setItem(row, 0, item)
-
-        self.model.blockSignals(False)
-    '''
-
-
 
 def main():
     
