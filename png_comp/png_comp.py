@@ -17,7 +17,7 @@ class ParentItem(QtGui.QStandardItem):
         super(ParentItem, self).__init__(text)
 
     def clone(self):
-        return self
+        return ParentItem('')
 
     def type(self):
         return QtGui.QStandardItem.UserType+1
@@ -80,12 +80,13 @@ class BaseWin(QtGui.QMainWindow):
         self.scene = QtGui.QGraphicsScene()
     
         self.model = QtGui.QStandardItemModel()
+        self.model.setItemPrototype(ParentItem(''))
         self.model.itemChanged.connect(self.item_changed)
 
         #self.treeview = QtGui.QTreeView()
         self.treeview = MyTreeView()
-        #self.treeview.setDragEnabled(True)
-        #self.treeview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.treeview.setDragEnabled(True)
+        self.treeview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
 
         self.treeview.setHeaderHidden(True)
         self.treeview.setModel(self.model)
