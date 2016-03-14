@@ -19,6 +19,37 @@ class ChildItem(QtGui.QStandardItem):
 
 
 #class BaseWin(QtGui.QWidget):
+class MyTreeView(QtGui.QTreeView):
+    
+    def __init__(self):
+        super(MyTreeView, self).__init__() 
+
+    def mousePressEvent(self, event):
+        
+        index = self.indexAt(event.pos());
+        clicked_row = index.row()
+        parent_index = index.parent()
+        model = index.model()
+
+        print clicked_row
+
+        #model.blockSignals(True)
+        parent_item = model.itemFromIndex(parent_index)
+
+        if parent_item is not None:
+            print parent_item
+
+            for row in range(parent_item.rowCount()):
+                child_item = parent_item.child(row)
+                if row != clicked_row:
+                    child_item.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
+        #model.blockSignals(False)
+        self.update()
+        QtGui.QTreeView.mousePressEvent(self, event)
+
+
+#class BaseWin(QtGui.QWidget):
 class BaseWin(QtGui.QMainWindow):
     
     def __init__(self):
@@ -52,7 +83,8 @@ class BaseWin(QtGui.QMainWindow):
         self.model = QtGui.QStandardItemModel()
         self.model.itemChanged.connect(self.item_changed)
 
-        self.treeview = QtGui.QTreeView()
+        #self.treeview = QtGui.QTreeView()
+        self.treeview = MyTreeView()
         self.treeview.setHeaderHidden(True)
         self.treeview.setModel(self.model)
         self.treeview.setAlternatingRowColors(True)
