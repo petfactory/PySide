@@ -38,7 +38,7 @@ class BaseWin(QtGui.QMainWindow):
 
         #exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self) 
         #open_action = QtGui.QAction('Open', self)
-        open_action = QtGui.QAction(QtGui.QIcon('open_dir.png'), '&Open', self)
+        open_action = QtGui.QAction(QtGui.QIcon(self.resource_path('open_dir.png')), '&Open', self)
         open_action.setShortcut('Ctrl+O')
         open_action.setStatusTip('Open directory')
         open_action.triggered.connect(self.open_dir)
@@ -73,11 +73,11 @@ class BaseWin(QtGui.QMainWindow):
         move_layer_down_button = QtGui.QPushButton()
 
         layer_order_hbox.addWidget(move_layer_up_button)
-        move_layer_up_button.setIcon(QtGui.QIcon('up_arrow.png'))
+        move_layer_up_button.setIcon(QtGui.QIcon(self.resource_path('up_arrow.png')))
         move_layer_up_button.setFixedHeight(26)
 
         layer_order_hbox.addWidget(move_layer_down_button)
-        move_layer_down_button.setIcon(QtGui.QIcon('down_arrow.png'))
+        move_layer_down_button.setIcon(QtGui.QIcon(self.resource_path('down_arrow.png')))
         move_layer_down_button.setFixedHeight(26)
 
         left_vbox.addLayout(layer_order_hbox)
