@@ -129,7 +129,8 @@ QToolBar {
 }
 
 QToolBar::handle {
-    background: #3d8ec9;
+    /*background: #3d8ec9;*/
+    image: url(:/petfactoryIcons/rc/splitter.png);
     width: 20px;
 }
 
@@ -269,5 +270,14 @@ QTreeView::indicator:checked {
     image: url(:/petfactoryIcons/rc/checkbox-checked.png);
 }
 
+QSplitter::handle {
+    image: url(:/petfactoryIcons/rc/splitter.png);
+}
 
+QSplitter::handle:horizontal {
+    width: 11px;
+}
 
+QSplitter::handle:vertical {
+    height: 11px;
+}

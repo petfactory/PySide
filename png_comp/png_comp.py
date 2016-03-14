@@ -3,9 +3,6 @@
 
 '''
 TODO:
-
-fix splitter image
-fix toolbar drag icon
 reorder parent layers, adjust z_index
 only load .png, .jpeg, .jpg
 '''
@@ -41,7 +38,7 @@ class BaseWin(QtGui.QMainWindow):
 
         #exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self) 
         #open_action = QtGui.QAction('Open', self)
-        open_action = QtGui.QAction(QtGui.QIcon('open.png'), '&Open', self)
+        open_action = QtGui.QAction(QtGui.QIcon('open_dir.png'), '&Open', self)
         open_action.setShortcut('Ctrl+O')
         open_action.setStatusTip('Open directory')
         open_action.triggered.connect(self.open_dir)
@@ -68,13 +65,20 @@ class BaseWin(QtGui.QMainWindow):
         self.setCentralWidget(splitter)
 
         left_frame = QtGui.QFrame()
+        left_frame.setMinimumWidth(200)
         left_vbox = QtGui.QVBoxLayout(left_frame)
         left_vbox.addWidget(self.treeview)
         layer_order_hbox = QtGui.QHBoxLayout()
-        move_layer_up_button = QtGui.QPushButton('Up')
-        move_layer_down_button = QtGui.QPushButton('Down')
+        move_layer_up_button = QtGui.QPushButton()
+        move_layer_down_button = QtGui.QPushButton()
+
         layer_order_hbox.addWidget(move_layer_up_button)
+        move_layer_up_button.setIcon(QtGui.QIcon('up_arrow.png'))
+        move_layer_up_button.setFixedHeight(26)
+
         layer_order_hbox.addWidget(move_layer_down_button)
+        move_layer_down_button.setIcon(QtGui.QIcon('down_arrow.png'))
+        move_layer_down_button.setFixedHeight(26)
 
         left_vbox.addLayout(layer_order_hbox)
         splitter.addWidget(left_frame)
@@ -85,6 +89,7 @@ class BaseWin(QtGui.QMainWindow):
         splitter.addWidget(right_frame)
 
 
+        splitter.setSizes([100, 600])
 
         self.load_assets(self.resource_path('./assets'))
 
