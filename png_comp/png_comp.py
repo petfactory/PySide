@@ -12,7 +12,15 @@ import petfactoryStyle
 
         
 class ParentItem(QtGui.QStandardItem):
-    pass
+    
+    def __init__(self, text):
+        super(ParentItem, self).__init__(text)
+
+    def clone(self):
+        return self
+
+    def type(self):
+        return QtGui.QStandardItem.UserType+1
 
 class ChildItem(QtGui.QStandardItem):
     pass
@@ -26,26 +34,26 @@ class MyTreeView(QtGui.QTreeView):
 
     def mousePressEvent(self, event):
         
-        index = self.indexAt(event.pos());
-        clicked_row = index.row()
-        parent_index = index.parent()
+        index = self.indexAt(event.pos())
         model = index.model()
+        if model is not None:
 
-        print clicked_row
+            clicked_row = index.row()
+            parent_index = index.parent()
 
-        #model.blockSignals(True)
-        parent_item = model.itemFromIndex(parent_index)
+            #model.blockSignals(True)
+            parent_item = model.itemFromIndex(parent_index)
 
-        if parent_item is not None:
-            print parent_item
+            if parent_item is not None:
 
-            for row in range(parent_item.rowCount()):
-                child_item = parent_item.child(row)
-                if row != clicked_row:
-                    child_item.setCheckState(QtCore.Qt.CheckState.Unchecked)
+                for row in range(parent_item.rowCount()):
+                    child_item = parent_item.child(row)
+                    if row != clicked_row:
+                        child_item.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-        #model.blockSignals(False)
-        self.update()
+            #model.blockSignals(False)
+            self.update()
+
         QtGui.QTreeView.mousePressEvent(self, event)
 
 
@@ -60,15 +68,6 @@ class BaseWin(QtGui.QMainWindow):
 
         self.layer_dict = {}
 
-        '''
-        exitAction = QtGui.QAction('Exit', self)
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(self.close)
-        '''
-
-        #exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self) 
-        #open_action = QtGui.QAction('Open', self)
         open_action = QtGui.QAction(QtGui.QIcon(self.resource_path('open_dir.png')), '&Open', self)
         open_action.setShortcut('Ctrl+O')
         open_action.setStatusTip('Open directory')
@@ -85,6 +84,9 @@ class BaseWin(QtGui.QMainWindow):
 
         #self.treeview = QtGui.QTreeView()
         self.treeview = MyTreeView()
+        #self.treeview.setDragEnabled(True)
+        #self.treeview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+
         self.treeview.setHeaderHidden(True)
         self.treeview.setModel(self.model)
         self.treeview.setAlternatingRowColors(True)
@@ -136,17 +138,24 @@ class BaseWin(QtGui.QMainWindow):
             if key == QtCore.Qt.Key_Space:
 
                 index = self.treeview.selectedIndexes()[0]
-                item = self.model.itemFromIndex(index)
+                item = index.model().itemFromIndex(index)
 
-                if not isinstance(item, ParentItem):
+                print item.type()
+
+                #if not isinstance(item, ParentItem):
+                if not item.type() == QtGui.QStandardItem.UserType+1:
+                    print 'Not a Parent item!'
                     return True
 
                 if not item.hasChildren():
+                    print 2
                     return
 
+                
                 curr_sel = None
                 num_rows = item.rowCount()
-
+                print item.text()
+                print num_rows
 
                 if num_rows == 1:
                     child = item.child(0)
@@ -219,7 +228,7 @@ class BaseWin(QtGui.QMainWindow):
         for key in sorted(key_list):
             
             parent_item = ParentItem(key)
-            parent_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+            parent_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled)
 
             parent_item.setCheckable(True)
             self.model.setItem(self.model.rowCount(), 0, parent_item)
