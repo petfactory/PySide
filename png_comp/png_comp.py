@@ -1,15 +1,9 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-'''
-TODO:
-reorder parent layers, adjust z_index
-skip the layer dict and add directly to the layer userData
-'''
 import sys, os
 from PySide import QtGui, QtCore
 import petfactoryStyle
-
 
 '''
 # custom data
@@ -268,41 +262,6 @@ class BaseWin(QtGui.QMainWindow):
 
                 parent_item.appendRow(child_item)
 
-
-        #for layer_name, child_list in self.layer_dict.iteritems():
-        '''
-        for key in sorted(key_list):
-            
-            parent_item = ParentItem(key)
-            parent_item.setData(BaseWin.PARENT_ITEM, QtCore.Qt.UserRole)
-            parent_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled)
-            parent_item.setCheckable(True)
-
-            self.model.setItem(self.model.rowCount(), 0, parent_item)
-
-            child_list = self.layer_dict.get(key)
-
-            for index, child in enumerate(child_list):
-
-                child_item = ChildItem(child)
-                child_item.setData( BaseWin.CHILD_ITEM, QtCore.Qt.UserRole)
-                child_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-                child_item.setCheckable(True)
-
-                if index == 0:
-
-                    child_item.setCheckState(QtCore.Qt.CheckState.Checked)
-                    pixmap_item =  child_list[child].get('path')
-                    z_value = child_list[child].get('z_value')
-                    pixmap_item.setZValue(z_value)
-                    self.scene.addItem(pixmap_item)
-
-
-                parent_item.appendRow(child_item)
-        '''
-
-
-
     def resource_path(self, relative_path):
         """ Get absolute path to resource, works for dev and for PyInstaller """
         try:
@@ -330,38 +289,7 @@ class BaseWin(QtGui.QMainWindow):
         elif item.data(BaseWin.DATA_ITEM_TYPE) == BaseWin.PARENT_ITEM:
 
             pass
-            #print 'Parent Item -> {}'.format(item.text())
 
-            #if not item.hasChildren():
-                #print 'Has no children'
-
-
-
-
-        '''
-        contents = self.layer_dict.get(item.text())
-
-        if contents is None:
-            
-            sub_layer_dict = self.layer_dict.get(item.parent().text())
-
-            if sub_layer_dict is None:
-                return
-
-            info_dict = sub_layer_dict.get(item.text())
-
-            pixmap_item = info_dict.get('path')
-            z_value = info_dict.get('z_value')
-
-            if pixmap_item is None:
-                return
-
-            if item.checkState() == QtCore.Qt.CheckState.Checked:
-                pixmap_item.setZValue(z_value)
-                self.scene.addItem(pixmap_item)
-            else:
-                self.scene.removeItem(pixmap_item)
-            '''
 
 def main():
     
