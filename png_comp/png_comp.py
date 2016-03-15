@@ -116,7 +116,7 @@ class BaseWin(QtGui.QMainWindow):
         self.model.setHorizontalHeaderLabels(['Layers'])
 
         self.view = QtGui.QGraphicsView(self.scene)
-        self.view.setSceneRect(0,0,800,600)        
+        #self.view.setSceneRect(0,0,800,600)        
 
         splitter = QtGui.QSplitter(self)
         self.setCentralWidget(splitter)
@@ -239,6 +239,11 @@ class BaseWin(QtGui.QMainWindow):
             self.model.insertRow(self.model.rowCount(), parent_item)
 
             for child_index, file in enumerate(files_list):
+
+                if child_index == 0:
+                    pixmap = QtGui.QPixmap(self.resource_path(file))
+                    self.view.setSceneRect(QtCore.QRect(QtCore.QPoint(0,0), pixmap.size()))
+                    pixmap_item = QtGui.QGraphicsPixmapItem(pixmap)
 
                 file_name = os.path.basename(file)
                 pixmap_item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path(file)))
