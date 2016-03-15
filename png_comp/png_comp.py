@@ -10,7 +10,14 @@ import sys, os
 from PySide import QtGui, QtCore
 import petfactoryStyle
 
-        
+
+'''
+# custom data
+class MyPixmapData(object):
+    
+    def __init__(self, pixmap):
+        self.pixmap = pixmap
+
 class ParentItem(QtGui.QStandardItem):
     
     def __init__(self, *args):
@@ -32,7 +39,7 @@ class ChildItem(QtGui.QStandardItem):
 
     def type(self):
         return QtGui.QStandardItem.UserType+2
-
+'''
 
 class MyTreeView(QtGui.QTreeView):
     
@@ -70,14 +77,18 @@ class BaseWin(QtGui.QMainWindow):
     PARENT_ITEM = 0
     CHILD_ITEM = 1
 
+    DATA_ITEM_TYPE = QtCore.Qt.UserRole
+    DATA_PIXMAP_KEY = QtCore.Qt.UserRole+1
+    #DATA_Z_VALUE = QtCore.Qt.UserRole+2
+
 
     def __init__(self):
         super(BaseWin, self).__init__() 
 
         self.setGeometry(5, 50, 600, 500)
         self.setWindowTitle('Test')
-
         self.layer_dict = {}
+
         self.valid_ext = ['.png', '.jpg', '.jpeg']
 
         open_action = QtGui.QAction(QtGui.QIcon(self.resource_path('open_dir.png')), '&Open', self)
@@ -97,6 +108,7 @@ class BaseWin(QtGui.QMainWindow):
         self.model.setItemPrototype(ParentItem()) '''
 
         self.model.itemChanged.connect(self.item_changed)
+        self.model.rowsRemoved.connect(self.rows_removed)
 
         #self.treeview = QtGui.QTreeView()
         self.treeview = MyTreeView()
@@ -120,20 +132,6 @@ class BaseWin(QtGui.QMainWindow):
         left_vbox = QtGui.QVBoxLayout(left_frame)
         left_vbox.addWidget(self.treeview)
 
-        #layer_order_hbox = QtGui.QHBoxLayout()
-        #move_layer_up_button = QtGui.QPushButton()
-        #move_layer_down_button = QtGui.QPushButton()
-
-        #layer_order_hbox.addWidget(move_layer_up_button)
-        #move_layer_up_button.setIcon(QtGui.QIcon(self.resource_path('up_arrow.png')))
-        #move_layer_up_button.setFixedHeight(26)
-
-        #layer_order_hbox.addWidget(move_layer_down_button)
-        #move_layer_down_button.setIcon(QtGui.QIcon(self.resource_path('down_arrow.png')))
-        #move_layer_down_button.setFixedHeight(26)
-
-        #left_vbox.addLayout(layer_order_hbox)
-
         splitter.addWidget(left_frame)
         
         right_frame = QtGui.QFrame()
@@ -148,15 +146,15 @@ class BaseWin(QtGui.QMainWindow):
 
         self.treeview.installEventFilter(self)
 
-        self.model.rowsInserted.connect(self.rows_inserted)
+    def rows_removed(self, parent, first, last):
+        
+        for row in range(self.model.rowCount()):
+            item = self.model.item(row, 0)
 
-    def rows_inserted(self, *args):
-        print 'Rows inserted'
-
-        num_rows = self.model.invisibleRootItem().rowCount()
-
-        for row in range(num_rows):
-            print self.model.item(row)
+            for child_row in range(item.rowCount()):
+                child_item = item.child(child_row)
+                pixmap_item = self.layer_dict.get(child_item.data(BaseWin.DATA_PIXMAP_KEY))
+                pixmap_item.setZValue(self.model.rowCount()-1-row)
 
     def eventFilter(self, widget, event):
 
@@ -168,20 +166,21 @@ class BaseWin(QtGui.QMainWindow):
                 index = self.treeview.selectedIndexes()[0]
                 item = index.model().itemFromIndex(index)
 
-                #if not isinstance(item, ParentItem):
-                #if not item.type() == QtGui.QStandardItem.UserType+1:
-                if item.data(QtCore.Qt.UserRole) != BaseWin.PARENT_ITEM:
-                    print 'Not a Parent item!'
+                if item.data(BaseWin.DATA_ITEM_TYPE) != BaseWin.PARENT_ITEM:
+                    print 'Not a Parent item'
                     return True
 
                 if not item.hasChildren():
+                    print 'Has no children'
                     return True
 
                 curr_sel = None
                 num_rows = item.rowCount()
 
                 if num_rows == 1:
+
                     child = item.child(0)
+
                     if child.checkState() == QtCore.Qt.CheckState.Checked:
                         child.setCheckState(QtCore.Qt.CheckState.Unchecked)
                     else:
@@ -230,28 +229,48 @@ class BaseWin(QtGui.QMainWindow):
             return
 
         self.cleanModel(self.model)
-        self.layer_dict = {}
 
         dir_list = [p for p in os.listdir(path) if os.path.isdir(os.path.join(path, p))]
 
-        for index, dir in enumerate(sorted(dir_list)):
+        for parent_index, dir_name in enumerate(sorted(dir_list)):
 
-            sub_layer_dict = {}
-            self.layer_dict[dir] = sub_layer_dict
-
-            dir_path = os.path.join(path, dir)
-            
+            dir_path = os.path.join(path, dir_name)            
             files_list = [os.path.join(dir_path, f) for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f)) and os.path.splitext(f)[-1] in self.valid_ext]
 
-            for file in files_list:
-                base = os.path.basename(file)
-                sub_layer_dict[base] = {    'path':QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path(file))),
-                                            'z_value': index
-                                        }
+            parent_item = QtGui.QStandardItem(dir_name)
+            parent_item.setData(BaseWin.PARENT_ITEM, BaseWin.DATA_ITEM_TYPE)
+            parent_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled)
+            parent_item.setCheckable(True)
 
-        key_list = self.layer_dict.keys()
+            self.model.insertRow(self.model.rowCount(), parent_item)
+
+            for child_index, file in enumerate(files_list):
+
+                file_name = os.path.basename(file)
+                pixmap_item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(self.resource_path(file)))
+                pixmap_item.setZValue(len(dir_list)-1-parent_index)
+                self.layer_dict[file] = pixmap_item
+
+                child_item = QtGui.QStandardItem(file_name)
+                child_item.setData(BaseWin.CHILD_ITEM, BaseWin.DATA_ITEM_TYPE)
+
+                
+                child_item.setData(file, BaseWin.DATA_PIXMAP_KEY)
+
+                
+                child_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                child_item.setCheckable(True)
+
+                if child_index == 0:
+
+                    child_item.setCheckState(QtCore.Qt.CheckState.Checked)
+                    self.scene.addItem(pixmap_item)
+
+                parent_item.appendRow(child_item)
+
 
         #for layer_name, child_list in self.layer_dict.iteritems():
+        '''
         for key in sorted(key_list):
             
             parent_item = ParentItem(key)
@@ -280,6 +299,7 @@ class BaseWin(QtGui.QMainWindow):
 
 
                 parent_item.appendRow(child_item)
+        '''
 
 
 
@@ -295,6 +315,30 @@ class BaseWin(QtGui.QMainWindow):
 
     def item_changed(self, item):
 
+        if item.data(BaseWin.DATA_ITEM_TYPE) == BaseWin.CHILD_ITEM:
+
+            pixmap_item = self.layer_dict.get(item.data(BaseWin.DATA_PIXMAP_KEY))
+
+            if item.checkState() == QtCore.Qt.CheckState.Checked:
+                self.scene.addItem(pixmap_item)
+                print 'Child item -> {} Checked'.format(item.text())
+
+            else:
+                self.scene.removeItem(pixmap_item)
+                print 'Child item -> {} Uncecked'.format(item.text())
+
+        elif item.data(BaseWin.DATA_ITEM_TYPE) == BaseWin.PARENT_ITEM:
+
+            pass
+            #print 'Parent Item -> {}'.format(item.text())
+
+            #if not item.hasChildren():
+                #print 'Has no children'
+
+
+
+
+        '''
         contents = self.layer_dict.get(item.text())
 
         if contents is None:
@@ -317,6 +361,7 @@ class BaseWin(QtGui.QMainWindow):
                 self.scene.addItem(pixmap_item)
             else:
                 self.scene.removeItem(pixmap_item)
+            '''
 
 def main():
     
