@@ -4,7 +4,7 @@
 '''
 TODO:
 reorder parent layers, adjust z_index
-only load .png, .jpeg, .jpg
+skip the layer dict and add directly to the layer userData
 '''
 import sys, os
 from PySide import QtGui, QtCore
@@ -13,20 +13,27 @@ import petfactoryStyle
         
 class ParentItem(QtGui.QStandardItem):
     
-    def __init__(self, text):
-        super(ParentItem, self).__init__(text)
+    def __init__(self, *args):
+        super(ParentItem, self).__init__(*args)
 
     def clone(self):
-        return ParentItem('')
+        return ParentItem()
 
     def type(self):
         return QtGui.QStandardItem.UserType+1
 
 class ChildItem(QtGui.QStandardItem):
-    pass
+    
+    def __init__(self, *args):
+        super(ChildItem, self).__init__(*args)
+
+    def clone(self):
+        return ChildItem()
+
+    def type(self):
+        return QtGui.QStandardItem.UserType+2
 
 
-#class BaseWin(QtGui.QWidget):
 class MyTreeView(QtGui.QTreeView):
     
     def __init__(self):
@@ -60,6 +67,10 @@ class MyTreeView(QtGui.QTreeView):
 #class BaseWin(QtGui.QWidget):
 class BaseWin(QtGui.QMainWindow):
     
+    PARENT_ITEM = 0
+    CHILD_ITEM = 1
+
+
     def __init__(self):
         super(BaseWin, self).__init__() 
 
@@ -67,6 +78,7 @@ class BaseWin(QtGui.QMainWindow):
         self.setWindowTitle('Test')
 
         self.layer_dict = {}
+        self.valid_ext = ['.png', '.jpg', '.jpeg']
 
         open_action = QtGui.QAction(QtGui.QIcon(self.resource_path('open_dir.png')), '&Open', self)
         open_action.setShortcut('Ctrl+O')
@@ -80,11 +92,15 @@ class BaseWin(QtGui.QMainWindow):
         self.scene = QtGui.QGraphicsScene()
     
         self.model = QtGui.QStandardItemModel()
-        self.model.setItemPrototype(ParentItem(''))
+
+        ''' Set the item prototype
+        self.model.setItemPrototype(ParentItem()) '''
+
         self.model.itemChanged.connect(self.item_changed)
 
         #self.treeview = QtGui.QTreeView()
         self.treeview = MyTreeView()
+        
         self.treeview.setDragEnabled(True)
         self.treeview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
 
@@ -103,19 +119,21 @@ class BaseWin(QtGui.QMainWindow):
         left_frame.setMinimumWidth(200)
         left_vbox = QtGui.QVBoxLayout(left_frame)
         left_vbox.addWidget(self.treeview)
-        layer_order_hbox = QtGui.QHBoxLayout()
-        move_layer_up_button = QtGui.QPushButton()
-        move_layer_down_button = QtGui.QPushButton()
 
-        layer_order_hbox.addWidget(move_layer_up_button)
-        move_layer_up_button.setIcon(QtGui.QIcon(self.resource_path('up_arrow.png')))
-        move_layer_up_button.setFixedHeight(26)
+        #layer_order_hbox = QtGui.QHBoxLayout()
+        #move_layer_up_button = QtGui.QPushButton()
+        #move_layer_down_button = QtGui.QPushButton()
 
-        layer_order_hbox.addWidget(move_layer_down_button)
-        move_layer_down_button.setIcon(QtGui.QIcon(self.resource_path('down_arrow.png')))
-        move_layer_down_button.setFixedHeight(26)
+        #layer_order_hbox.addWidget(move_layer_up_button)
+        #move_layer_up_button.setIcon(QtGui.QIcon(self.resource_path('up_arrow.png')))
+        #move_layer_up_button.setFixedHeight(26)
 
-        left_vbox.addLayout(layer_order_hbox)
+        #layer_order_hbox.addWidget(move_layer_down_button)
+        #move_layer_down_button.setIcon(QtGui.QIcon(self.resource_path('down_arrow.png')))
+        #move_layer_down_button.setFixedHeight(26)
+
+        #left_vbox.addLayout(layer_order_hbox)
+
         splitter.addWidget(left_frame)
         
         right_frame = QtGui.QFrame()
@@ -130,6 +148,15 @@ class BaseWin(QtGui.QMainWindow):
 
         self.treeview.installEventFilter(self)
 
+        self.model.rowsInserted.connect(self.rows_inserted)
+
+    def rows_inserted(self, *args):
+        print 'Rows inserted'
+
+        num_rows = self.model.invisibleRootItem().rowCount()
+
+        for row in range(num_rows):
+            print self.model.item(row)
 
     def eventFilter(self, widget, event):
 
@@ -141,22 +168,17 @@ class BaseWin(QtGui.QMainWindow):
                 index = self.treeview.selectedIndexes()[0]
                 item = index.model().itemFromIndex(index)
 
-                print item.type()
-
                 #if not isinstance(item, ParentItem):
-                if not item.type() == QtGui.QStandardItem.UserType+1:
+                #if not item.type() == QtGui.QStandardItem.UserType+1:
+                if item.data(QtCore.Qt.UserRole) != BaseWin.PARENT_ITEM:
                     print 'Not a Parent item!'
                     return True
 
                 if not item.hasChildren():
-                    print 2
-                    return
+                    return True
 
-                
                 curr_sel = None
                 num_rows = item.rowCount()
-                print item.text()
-                print num_rows
 
                 if num_rows == 1:
                     child = item.child(0)
@@ -171,6 +193,10 @@ class BaseWin(QtGui.QMainWindow):
                         if item.child(row).checkState() == QtCore.Qt.CheckState.Checked:
                             curr_sel = row
                             break
+
+                    if curr_sel is None:
+                        item.child(num_rows-1).setCheckState(QtCore.Qt.CheckState.Checked)
+                        curr_sel = num_rows-1
 
                     new_sel = (curr_sel+1) % num_rows
                     
@@ -215,7 +241,7 @@ class BaseWin(QtGui.QMainWindow):
 
             dir_path = os.path.join(path, dir)
             
-            files_list = [os.path.join(dir_path, f) for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+            files_list = [os.path.join(dir_path, f) for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f)) and os.path.splitext(f)[-1] in self.valid_ext]
 
             for file in files_list:
                 base = os.path.basename(file)
@@ -229,18 +255,23 @@ class BaseWin(QtGui.QMainWindow):
         for key in sorted(key_list):
             
             parent_item = ParentItem(key)
+            parent_item.setData(BaseWin.PARENT_ITEM, QtCore.Qt.UserRole)
             parent_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled)
-
             parent_item.setCheckable(True)
+
             self.model.setItem(self.model.rowCount(), 0, parent_item)
+
             child_list = self.layer_dict.get(key)
 
             for index, child in enumerate(child_list):
-                child_item = ChildItem(child)
-                child_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
 
+                child_item = ChildItem(child)
+                child_item.setData( BaseWin.CHILD_ITEM, QtCore.Qt.UserRole)
+                child_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                 child_item.setCheckable(True)
+
                 if index == 0:
+
                     child_item.setCheckState(QtCore.Qt.CheckState.Checked)
                     pixmap_item =  child_list[child].get('path')
                     z_value = child_list[child].get('z_value')
