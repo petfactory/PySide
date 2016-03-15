@@ -128,11 +128,15 @@ QToolBar {
     border: none;
 }
 
-QToolBar::handle {
-    /*background: #3d8ec9;*/
-    image: url(:/petfactoryIcons/rc/splitter.png);
+QToolBar::handle:horizontal {
+    image: url(:/petfactoryIcons/rc/toolbar-horizontal.png);
     width: 20px;
-}
+
+    }
+QToolBar::handle:vertical {
+    image: url(:/petfactoryIcons/rc/toolbar-vertical.png);
+    height: 20px;
+    }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

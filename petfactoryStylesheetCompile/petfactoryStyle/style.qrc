@@ -12,6 +12,8 @@
     <file>rc/checkbox-unchecked.png</file>
     <file>rc/checkbox-checked.png</file>
     <file>rc/splitter.png</file>
+    <file>rc/toolbar-vertical.png</file>
+    <file>rc/toolbar-horizontal.png</file>
   </qresource>
   <qresource prefix="petfactoryStyle">
       <file>style.qss</file>
