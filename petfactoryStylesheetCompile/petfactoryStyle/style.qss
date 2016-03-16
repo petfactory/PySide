@@ -289,3 +289,16 @@ QSplitter::handle:horizontal {
 QSplitter::handle:vertical {
     height: 11px;
 }
+
+
+QMenuBar {
+    background-color: #575757;
+}
+
+QMenuBar::item {
+    spacing: 3px; /* spacing between menu bar items */
+    padding: 3px 1px;
+    background: transparent;
+    border-radius: 0px;
+}
+

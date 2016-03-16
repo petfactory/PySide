@@ -85,13 +85,25 @@ class BaseWin(QtGui.QMainWindow):
 
         self.valid_ext = ['.png', '.jpg', '.jpeg']
 
+        menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)
+        file_menu = menubar.addMenu('&File')
+
+        #exit_action = QtGui.QAction('Exit', self)
+        #exit_action.setShortcut('Ctrl+Q')
+        #exit_action.setStatusTip('Exit application')
+        #exit_action.triggered.connect(self.close)
+        #file_menu.addAction(exit_action)
+
+
         open_action = QtGui.QAction(QtGui.QIcon(self.resource_path('open_dir.png')), '&Open', self)
         open_action.setShortcut('Ctrl+O')
         open_action.setStatusTip('Open directory')
         open_action.triggered.connect(self.open_dir)
+        file_menu.addAction(open_action)
 
-        self.toolbar = self.addToolBar('Open')
-        self.toolbar.addAction(open_action)
+        #self.toolbar = self.addToolBar('Open')
+        #self.toolbar.addAction(open_action)
 
 
         self.scene = QtGui.QGraphicsScene()

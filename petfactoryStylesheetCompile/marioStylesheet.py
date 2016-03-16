@@ -10,7 +10,7 @@ import petfactoryStyle
 reload(petfactoryStyle)
 import petfactoryStyle.compile_qrc
 
-class BaseWin(QtGui.QWidget):
+class BaseWin(QtGui.QMainWindow):
     
     def __init__(self):
         super(BaseWin, self).__init__() 
@@ -18,8 +18,21 @@ class BaseWin(QtGui.QWidget):
         self.setGeometry(20, 60, 300, 200)
         self.setWindowTitle('Test')
 
+        main_frame = QtGui.QFrame()
+        self.setCentralWidget(main_frame)
+
         # layout
-        vbox = QtGui.QVBoxLayout(self)
+        vbox = QtGui.QVBoxLayout(main_frame)
+
+        menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)
+        file_menu = menubar.addMenu('&File')
+
+        open_action = QtGui.QAction('&Open', self)
+        open_action.setShortcut('Ctrl+O')
+        open_action.setStatusTip('Open directory')
+        file_menu.addAction(open_action)
+
         
         # treeview
         self.treeview = QtGui.QTreeView() #DeselectableTreeView()
