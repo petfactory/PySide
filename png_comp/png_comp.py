@@ -80,7 +80,7 @@ class BaseWin(QtGui.QMainWindow):
         super(BaseWin, self).__init__() 
 
         self.setGeometry(5, 50, 600, 500)
-        self.setWindowTitle('Test')
+        #self.setWindowTitle('Test')
         self.layer_dict = {}
 
         self.valid_ext = ['.png', '.jpg', '.jpeg']
