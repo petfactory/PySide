@@ -102,6 +102,11 @@ class BaseWin(QtGui.QMainWindow):
         open_action.triggered.connect(self.open_dir)
         file_menu.addAction(open_action)
 
+        print_action = QtGui.QAction('Print', self)
+        print_action.setStatusTip('Print Image')
+        print_action.triggered.connect(self.print_image)
+        file_menu.addAction(print_action)
+
         #self.toolbar = self.addToolBar('Open')
         #self.toolbar.addAction(open_action)
 
@@ -162,6 +167,13 @@ class BaseWin(QtGui.QMainWindow):
                 child_item = item.child(child_row)
                 pixmap_item = self.layer_dict.get(child_item.data(BaseWin.DATA_PIXMAP_KEY))
                 pixmap_item.setZValue(self.model.rowCount()-1-row)
+
+    def print_image(self):
+        
+        file_name, _ = QtGui.QFileDialog.getSaveFileName(self, "Save Scene", "", "Image (*.png)")
+        pixmap = QtGui.QPixmap.grabWidget(self.view)
+        pixmap.save(file_name, 'png', -1);
+
 
     def eventFilter(self, widget, event):
 
