@@ -234,7 +234,7 @@ class BaseWin(QtGui.QMainWindow):
             parent_item = QtGui.QStandardItem(dir_name)
             parent_item.setData(BaseWin.PARENT_ITEM, BaseWin.DATA_ITEM_TYPE)
             parent_item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled)
-            parent_item.setCheckable(True)
+            #parent_item.setCheckable(True)
 
             self.model.insertRow(self.model.rowCount(), parent_item)
 
