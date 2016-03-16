@@ -170,9 +170,19 @@ class BaseWin(QtGui.QMainWindow):
 
     def print_image(self):
         
+        rect = self.scene.sceneRect()
+        w, h = rect.width(), rect.height()
+
+        dest_pixmap = QtGui.QPixmap(w, h)
+
+        painter = QtGui.QPainter(dest_pixmap)
+        self.scene.render(painter, rect, rect)
+        painter.end()
+
         file_name, _ = QtGui.QFileDialog.getSaveFileName(self, "Save Scene", "", "Image (*.png)")
-        pixmap = QtGui.QPixmap.grabWidget(self.view)
-        pixmap.save(file_name, 'png', -1);
+        
+        #pixmap = QtGui.QPixmap.grabWidget(self.view)
+        dest_pixmap.save(file_name, 'png', -1);
 
 
     def eventFilter(self, widget, event):
