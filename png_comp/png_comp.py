@@ -106,6 +106,7 @@ class BaseWin(QtGui.QMainWindow):
 
         #self.treeview = QtGui.QTreeView()
         self.treeview = MyTreeView()
+        self.treeview.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 0)
         
         self.treeview.setDragEnabled(True)
         self.treeview.setDragDropMode(QtGui.QAbstractItemView.InternalMove)

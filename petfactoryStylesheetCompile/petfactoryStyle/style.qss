@@ -1,5 +1,5 @@
-QWidget
-{
+QWidget {
+
     color: #e4e4e4;
     background-color: #575757;
     selection-background-color:#3d8ec9;
@@ -10,27 +10,26 @@ QWidget
 }
 
 /*
-QWidget:item:hover
-{
+QWidget:item:hover {
+
     background-color: #78879b;
     color: black;
 }*/
 
-QWidget:item:selected
-{
+QWidget:item:selected {
     background-color: #3d8ec9;
 }
 
-QAbstractItemView
-{
+QAbstractItemView {
+
     alternate-background-color: #606060;
     border: 1px solid 3A3939;
     border-radius: 2px;
     padding: 1px;
 }
 
-QLineEdit
-{
+QLineEdit {
+
     background-color: #201F1F;
     padding: 2px;
     border-style: solid;
@@ -39,23 +38,23 @@ QLineEdit
     color: silver;
 }
 
-QTextEdit
-{
+QTextEdit {
+
     background-color: #201F1F;
     color: silver;
     border: 1px solid #3A3939;
 }
 
-QPlainTextEdit
-{
+QPlainTextEdit {
+
     background-color: #201F1F;;
     color: silver;
     border-radius: 2px;
     border: 1px solid #3A3939;
 }
 
-QHeaderView::section
-{
+QHeaderView::section {
+
     background-color: #3A3939;
     color: silver;
     padding-left: 4px;
@@ -147,6 +146,7 @@ Scrollbar
 /* Vertical */
 
 QScrollBar:vertical {
+
      border: 2px solid #333;
      background: #333;
      width: 13px;
@@ -155,6 +155,7 @@ QScrollBar:vertical {
 
 
 QScrollBar::handle:vertical {
+
      background: #888;
      min-height: 20px;
      margin: 0px;
@@ -162,6 +163,7 @@ QScrollBar::handle:vertical {
 }
 
 QScrollBar::handle:vertical:hover {
+
      background: #999;
 }
 
@@ -169,6 +171,7 @@ QScrollBar::handle:vertical:hover {
 /* arrow bg: bottom */
 
 QScrollBar::add-line:vertical {
+
      height: 16px;
      subcontrol-position: bottom;
      subcontrol-origin: margin;
@@ -178,6 +181,7 @@ QScrollBar::add-line:vertical {
 
 /* arrow bg: top */
 QScrollBar::sub-line:vertical {
+
      height: 16px;
      subcontrol-position: top;
      subcontrol-origin: margin;

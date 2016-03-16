@@ -27,6 +27,7 @@ class BaseWin(QtGui.QWidget):
         self.treeview.setAlternatingRowColors(True)
         self.treeview.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         #self.treeview.setHeaderHidden(True)
+        self.treeview.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 0)
         vbox.addWidget(self.treeview)
 
         # model
