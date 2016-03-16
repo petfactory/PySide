@@ -170,7 +170,7 @@ class BaseWin(QtGui.QMainWindow):
 
     def print_image(self):
         
-        rect = self.scene.sceneRect()
+        rect = self.view.sceneRect()
         w, h = rect.width(), rect.height()
 
         dest_pixmap = QtGui.QPixmap(w, h)
