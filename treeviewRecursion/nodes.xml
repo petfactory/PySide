@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<node name="root">
+	<node name="A">
+		<node name="A1_sub_1"/>
+		<node name="A2_sub_1">
+			<node name="A1_sub_2"/>
+			<mesh name="A2_sub_2"/>
+			<node name="A3_sub_2"/>
+		</node>
+		<node name="A3_sub_1"/>
+	</node>
+	<node name="B">
+		<mesh name="B1_sub_1"/>
+		<node name="B2_sub_1"/>
+	</node>
+	<node name="C">
+		<node name="C1_sub_1">
+			<node name="C1_sub_2">
+				<mesh name="C1_sub_3"/>
+			</node>
+		</node>
+	</node>
+</node>
