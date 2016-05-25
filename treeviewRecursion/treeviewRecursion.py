@@ -7,16 +7,20 @@ class NodeType(object):
     TRANSFORM = 0
     MESH = 1
 
+
+class UserRole(object):
+
+    NODETYPE = QtCore.Qt.UserRole + 1
+
+
 class StandardItemModel(QtGui.QStandardItemModel):
 
+    checkBoxToggled = QtCore.Signal(QtGui.QStandardItem, QtCore.Qt.CheckState)
+
     def __init__(self):
-        self.c = Communicate()
         super(StandardItemModel, self).__init__()
 
     
-class Communicate(QtCore.QObject):
-    checkBoxToggled = QtCore.Signal(QtGui.QStandardItem, QtCore.Qt.CheckState)
-
 class StandardItem(QtGui.QStandardItem):
 
     def __init__(self, text):
@@ -31,7 +35,7 @@ class StandardItem(QtGui.QStandardItem):
         elif role == QtCore.Qt.CheckStateRole:
             if self.model() is not None:
                 state = QtCore.Qt.CheckState.Unchecked if value is 0 else QtCore.Qt.CheckState.Checked
-                self.model().c.checkBoxToggled.emit(self, state)
+                self.model().checkBoxToggled.emit(self, state)
 
         super(StandardItem, self).setData(value, role)
         
@@ -40,21 +44,24 @@ class Example(QtGui.QWidget):
     def __init__(self):
         super(Example, self).__init__()
         
-        self.setGeometry(300, 300, 250, 350)
-        self.setWindowTitle('Icon')
+        self.setGeometry(50, 50, 350, 450)
+        #self.setWindowTitle('')
         self.xmlPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'nodes.xml')
         vbox = QtGui.QVBoxLayout(self)
         self.treeView = QtGui.QTreeView()
         self.meshItemList = []
         self.meshIconColor = (1, .8, 0, 1.0)
         self.transformIconColor = (.95, .95, .95, 1.0)
+        self.shiftModifier = False
 
-        #self.model = QtGui.QStandardItemModel()
         self.model = StandardItemModel()
-        self.model.c.checkBoxToggled.connect(self.itemCheckBoxToggled)
+        self.model.checkBoxToggled.connect(self.itemCheckBoxToggled)
         self.model.dataChanged.connect(self.dataChanged)
         vbox.addWidget(self.treeView)
         self.treeView.setModel(self.model)
+        self.treeView.installEventFilter(self)
+        self.treeView.expanded.connect(self.treeViewExpanded)
+        self.treeView.collapsed.connect(self.treeViewCollapsed)
 
 
         cleanupDagButton = QtGui.QPushButton('DAG Cleanup')
@@ -62,10 +69,63 @@ class Example(QtGui.QWidget):
         vbox.addWidget(cleanupDagButton)
         self.populateModelFromXml(self.xmlPath)
         
-        self.treeView.expandAll()
+        #self.treeView.expandAll()
         #self.treeView.setExpanded(self.model.indexFromItem(self.model.item(0,0)), True)
         #self.selectMeshStartingFromRoot()
-    
+
+        rootIndex = self.model.indexFromItem(self.model.item(0,0))
+        self.treeView.selectionModel().select(rootIndex, QtGui.QItemSelectionModel.Select)
+
+        self.setStyleSheet(
+        '''QWidget {
+
+            color: #e4e4e4;
+            background-color: #282828;
+            selection-background-color:#3d8ec9;
+            selection-color: black;
+            background-clip: border;
+            border-image: none;
+            outline: 0;
+        }'''
+        )
+
+    def recursiveExpand(self, view, index, expand):
+        
+        view.setExpanded(index, expand)
+        model = view.model()
+        numRows = model.rowCount(index)
+        for row in range(numRows):
+            child = model.index(row, 0, index)
+            self.recursiveExpand(view, child, expand)
+
+
+    def treeViewCollapsed(self, index):
+        if self.shiftModifier:
+            self.recursiveExpand(self.treeView, index, False)
+
+    def treeViewExpanded(self, index):
+        if self.shiftModifier:
+            self.recursiveExpand(self.treeView, index, True)
+
+
+    def eventFilter(self, widget, event):
+
+        if (event.type() == QtCore.QEvent.KeyPress and widget is self.treeView):
+            key = event.key()
+            if key == QtCore.Qt.Key_Shift:
+                self.shiftModifier = True
+            return False
+
+        elif (event.type() == QtCore.QEvent.KeyRelease and widget is self.treeView):
+            key = event.key()
+            if key == QtCore.Qt.Key_Shift:
+                self.shiftModifier = False
+            return False
+
+
+        return QtGui.QWidget.eventFilter(self, widget, event)
+
+
     def selectMeshStartingFromRoot(self):
         rootItem = self.model.item(0,0)
         nodeSet = set()
@@ -174,12 +234,14 @@ class Example(QtGui.QWidget):
         qItem.setCheckState(QtCore.Qt.CheckState.Checked)
 
         if xmlNode.tag == 'node':
-            qItem.setData(NodeType.TRANSFORM, QtCore.Qt.UserRole + 1)
-            qItem.setIcon(self.createColorIcon(self.transformIconColor, 12, 12))
+            qItem.setData(NodeType.TRANSFORM, UserRole.NODETYPE)
+            qItem.setIcon(QtGui.QIcon('transform.png'))
+            #qItem.setIcon(self.createColorIcon(self.transformIconColor, 12, 12))
 
         elif xmlNode.tag == 'mesh':
-            qItem.setData(NodeType.MESH, QtCore.Qt.UserRole + 1)
-            qItem.setIcon(self.createColorIcon(self.meshIconColor, 12, 12))
+            qItem.setData(NodeType.MESH, UserRole.NODETYPE)
+            qItem.setIcon(QtGui.QIcon('mesh.png'))
+            #qItem.setIcon(self.createColorIcon(self.meshIconColor, 12, 12))
         else:
             qItem.setIcon(self.createColorIcon((0,0,0,1), 12, 12))
 
