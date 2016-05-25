@@ -2,15 +2,12 @@ import sys, os
 from PySide import QtGui, QtCore
 import xml.etree.ElementTree as ET
 
-
 class NodeType(object):
 
     TRANSFORM = 0
     MESH = 1
 
 class StandardItemModel(QtGui.QStandardItemModel):
-
-    #checkboxToggled = QtCore.Signal(QtCore.QModelIndex)
 
     def __init__(self):
         self.c = Communicate()
@@ -64,10 +61,11 @@ class Example(QtGui.QWidget):
         cleanupDagButton.clicked.connect(self.cleanupDagButtonClicked)
         vbox.addWidget(cleanupDagButton)
         self.populateModelFromXml(self.xmlPath)
-        self.treeView.expandAll()
-
-        self.selectMeshStartingFromRoot()
         
+        self.treeView.expandAll()
+        #self.treeView.setExpanded(self.model.indexFromItem(self.model.item(0,0)), True)
+        #self.selectMeshStartingFromRoot()
+    
     def selectMeshStartingFromRoot(self):
         rootItem = self.model.item(0,0)
         nodeSet = set()
@@ -84,10 +82,8 @@ class Example(QtGui.QWidget):
         keepSet = set()
 
         self.recurseTreeView(rootItem, nodeSet, keepSet)
-        diffSet = nodeSet.symmetric_difference(keepSet)
-        #diffSet = keepSet.difference(nodeSet)
+        diffSet = nodeSet.difference(keepSet)
 
-        #self.selectMeshItem()
         for node in diffSet:
             self.treeView.selectionModel().select(self.model.indexFromItem(node), QtGui.QItemSelectionModel.Select)
 
@@ -119,44 +115,43 @@ class Example(QtGui.QWidget):
 
 
 
-    def recurseTreeView(self, node, nodeSet, keepSet, parentList=[]):
+    def recurseTreeView(self, node, nodeSet, keepSet):
 
         nodeSet.add(node)
 
         # if not visible in Maya, early return
         if node.checkState() == QtCore.Qt.CheckState.Unchecked:
-                #print 'UNCHECKED REMOVE: {}'.format('->'.join([n.text() for n in parentList]))
                 return
 
         # leaf item
         if not node.hasChildren():
 
             if node.data() == NodeType.MESH:
-                [keepSet.add(n) for n in parentList]
-                keepSet.add(node)
-                #print '   {}'.format('->'.join([n.text() for n in parentList]))
-            #else:
-            #    print 'REMOVE: {}'.format('->'.join([n.text() for n in parentList]))
-            #    pass
+
+                while True:
+
+                    if node in keepSet:
+                        break
+
+                    keepSet.add(node)
+                    parent = node.parent()
+
+                    if parent:
+                        node = parent
+                    else:
+                        break
 
         # loop through the children
         else:
             numRows = node.rowCount()
             if numRows > 0:
                 for row in range(numRows):
-                    parentList.append(node)
-                    self.recurseTreeView(node.child(row), nodeSet, keepSet, parentList)
-
-        if len(parentList) > 0:
-            parentList.pop()
-
+                    self.recurseTreeView(node.child(row), nodeSet, keepSet)
 
     def selectMeshItem(self):
 
         for meshItem in self.meshItemList:
             self.treeView.selectionModel().select(self.model.indexFromItem(meshItem), QtGui.QItemSelectionModel.Select)
-            #print self.model.indexFromItem(meshItem)
-            #print meshItem
 
     def populateModelFromXml(self, filePath):
 
@@ -201,7 +196,7 @@ def main():
     
     app = QtGui.QApplication(sys.argv)
     ex = Example()
-    ex.show()
+    ex.show() 
     sys.exit(app.exec_())
 
 
