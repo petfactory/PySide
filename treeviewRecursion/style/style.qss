@@ -1,0 +1,319 @@
+QWidget {
+
+    color: #CCCCCC;
+    background-color: #282828;
+    selection-background-color:#555555;
+    selection-color: black;
+    background-clip: border;
+    border-image: none;
+    outline: 0;
+}
+
+/*
+QWidget:item:hover {
+
+    background-color: #78879b;
+    color: black;
+}*/
+
+QWidget:item:selected {
+    background-color: #555555;
+}
+
+QAbstractItemView {
+
+    alternate-background-color: #606060;
+    /*border: 1px solid 3A3939;*/
+    border-radius: 2px;
+    padding: 1px;
+}
+
+QLineEdit {
+
+    /*background-color: #201F1F;*/
+    padding: 2px;
+    border-style: solid;
+    border: 1px solid #3A3939;
+    border-radius: 2px;
+    /*color: silver;*/
+    color: f00;
+}
+
+QTextEdit {
+
+    /*background-color: #201F1F;*/
+    /*color: silver;*/
+    color: f00;
+    border: 1px solid #3A3939;
+}
+
+QPlainTextEdit {
+
+    /*background-color: #201F1F;*/
+    /*color: silver;*/
+    /*color: f00;*/
+    border-radius: 2px;
+    border: 1px solid #3A3939;
+}
+
+/*
+QHeaderView::section {
+
+    background-color: #3A3939;
+    color: silver;
+    padding-left: 4px;
+    border: 1px solid #6c6c6c;
+}
+*/
+
+QTreeView::item {
+     height: 22px;
+     color: #CCC;
+}
+
+QTreeView::item:disabled {
+     height: 22px;
+     color: #555;
+}
+
+QTreeView::item:selected {
+    color: #000;
+}
+
+
+QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(:/petfactoryIcons/rc/vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(:/petfactoryIcons/rc/branch-more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(:/petfactoryIcons/rc/branch-end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed {
+        border-image: none;
+        image: url(:/petfactoryIcons/rc/branch-closed-end.png);
+}
+
+QTreeView::branch:closed:has-children:has-siblings {
+        border-image: none;
+        image: url(:/petfactoryIcons/rc/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings {
+        border-image: none;
+        image: url(:/petfactoryIcons/rc/branch-open-end.png);
+}
+
+QTreeView::branch:open:has-children:has-siblings  {
+        border-image: none;
+        image: url(:/petfactoryIcons/rc/branch-open.png);
+}
+
+QListView::item:!selected:hover, QListView::item:!selected:hover, QTreeView::item:!selected:hover  {
+    background: rgba(0, 0, 0, 0);
+    outline: 0;
+    /*color: #FF00FF;*/
+}
+
+QListView::item:selected:hover, QListView::item:selected:hover, QTreeView::item:selected:hover  {
+    /*background: #444444;*/
+    /*color: #FFFFFF;*/
+}
+
+
+QHeaderView::section {
+    background-color: #333;
+    color: #aaa;
+    padding-left: 2px;
+    padding-top: 2px;
+    /*border: 1px solid #333;*/
+    border: none;
+    height: 14px;
+}
+
+
+QToolBar {
+    background: #555;
+    spacing: 3px; /* spacing between items in the tool bar */
+    border: none;
+}
+
+QToolBar::handle:horizontal {
+    image: url(:/petfactoryIcons/rc/toolbar-horizontal.png);
+    width: 20px;
+
+    }
+QToolBar::handle:vertical {
+    image: url(:/petfactoryIcons/rc/toolbar-vertical.png);
+    height: 20px;
+    }
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Scrollbar
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+/* Vertical */
+
+QScrollBar:vertical {
+
+     border: 2px solid #333;
+     background: #333;
+     width: 13px;
+     margin: 18px 0 18px 0;
+}
+
+
+QScrollBar::handle:vertical {
+
+     background: #888;
+     min-height: 20px;
+     margin: 0px;
+     border-radius: 2px;
+}
+
+QScrollBar::handle:vertical:hover {
+
+     background: #999;
+}
+
+
+/* arrow bg: bottom */
+
+QScrollBar::add-line:vertical {
+
+     height: 16px;
+     subcontrol-position: bottom;
+     subcontrol-origin: margin;
+     background: #333;
+}
+
+
+/* arrow bg: top */
+QScrollBar::sub-line:vertical {
+
+     height: 16px;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+     background: #333;
+}
+
+QScrollBar::up-arrow:vertical {
+     width: 12px;
+     background: #333;
+     image: url(:/petfactoryIcons/rc/arrow-up.png) 0;
+}
+
+
+QScrollBar::down-arrow:vertical {
+     width: 12px;
+     background: #333;
+     image: url(:/petfactoryIcons/rc/arrow-down.png) 0;
+}
+
+ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+ }
+
+ /* Horizontal */
+
+QScrollBar:horizontal {
+     border: 2px solid #333;
+     background: #333;
+     height: 13px;
+     margin: 0px 18px 0px 18px;
+}
+
+
+QScrollBar::handle:horizontal {
+     background: #888;
+     min-width: 20px;
+     margin: 0px;
+     border-radius: 2px;
+}
+
+QScrollBar::handle:horizontal:hover {
+     background: #999;
+}
+
+
+/* arrow bg: bottom */
+
+QScrollBar::add-line:horizontal {
+     width: 16px;
+     subcontrol-position: right;
+     subcontrol-origin: margin;
+     background: #333;
+}
+
+
+/* arrow bg: top */
+QScrollBar::sub-line:horizontal {
+     width: 16px;
+     subcontrol-position: left;
+     subcontrol-origin: margin;
+     background: #333;
+}
+
+QScrollBar::left-arrow:horizontal {
+     height: 12px;
+     background: #333;
+     image: url(:/petfactoryIcons/rc/arrow-up.png) 0;
+}
+
+QScrollBar::right-arrow:horizontal {
+     height: 12px;
+     background: #333;
+     image: url(:/petfactoryIcons/rc/arrow-down.png) 0;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+     background: none;
+}
+
+
+
+
+QTreeView::indicator {
+    width: 20px;
+    height: 20px;
+    margin-left: -4px;
+}
+
+QTreeView::indicator:unchecked {
+    image: url(:/petfactoryIcons/rc/checkbox-unchecked.png);
+}
+
+QTreeView::indicator:checked {
+    image: url(:/petfactoryIcons/rc/checkbox-checked.png);
+}
+
+QSplitter::handle {
+    image: url(:/petfactoryIcons/rc/splitter.png);
+}
+
+QSplitter::handle:horizontal {
+    width: 11px;
+}
+
+QSplitter::handle:vertical {
+    height: 11px;
+}
+
+
+QMenuBar {
+    background-color: #575757;
+}
+
+QMenuBar::item {
+    spacing: 3px; /* spacing between menu bar items */
+    padding: 3px 1px;
+    background: transparent;
+    border-radius: 0px;
+}
+

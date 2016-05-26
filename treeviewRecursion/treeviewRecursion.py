@@ -1,34 +1,24 @@
 import sys, os
 from PySide import QtGui, QtCore
 import xml.etree.ElementTree as ET
-
-class NodeType(object):
-
-    TRANSFORM = 0
-    MESH = 1
-
-
-class UserRole(object):
-
-    NODETYPE = QtCore.Qt.UserRole + 1
-
+import style
 
 class StandardItemModel(QtGui.QStandardItemModel):
 
     checkBoxToggled = QtCore.Signal(QtGui.QStandardItem, QtCore.Qt.CheckState)
 
-    def __init__(self):
-        super(StandardItemModel, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(StandardItemModel, self).__init__(*args, **kwargs)
 
     
 class StandardItem(QtGui.QStandardItem):
 
-    def __init__(self, text):
-        super(StandardItem, self).__init__(text)
+    def __init__(self, *args, **kwargs):
+        super(StandardItem, self).__init__(*args, **kwargs)
 
     def setData(self, value, role=QtCore.Qt.UserRole+1):
 
-        #enum Qt::ItemDataRole
+        #enum QtCore.Qt.ItemDataRole
         if role == QtCore.Qt.EditRole:
             pass
 
@@ -39,13 +29,18 @@ class StandardItem(QtGui.QStandardItem):
 
         super(StandardItem, self).setData(value, role)
         
-class Example(QtGui.QWidget):
+class Outliner(QtGui.QWidget):
+
+    TRANSFORM_NODE = 0
+    MESH_NODE = 1
+
+    NODETYPE_ROLE = QtCore.Qt.UserRole + 1
 
     def __init__(self):
-        super(Example, self).__init__()
+        super(Outliner, self).__init__()
         
-        self.setGeometry(50, 50, 350, 450)
-        #self.setWindowTitle('')
+        self.setGeometry(30, 55, 350, 450)
+        self.setWindowTitle('Outliner')
         self.xmlPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'nodes.xml')
         vbox = QtGui.QVBoxLayout(self)
         self.treeView = QtGui.QTreeView()
@@ -56,6 +51,8 @@ class Example(QtGui.QWidget):
 
         self.model = StandardItemModel()
         self.model.checkBoxToggled.connect(self.itemCheckBoxToggled)
+        #self.model.checkBoxToggled.connect(self.recursiveCheckState)
+        
         self.model.dataChanged.connect(self.dataChanged)
         vbox.addWidget(self.treeView)
         self.treeView.setModel(self.model)
@@ -76,18 +73,6 @@ class Example(QtGui.QWidget):
         rootIndex = self.model.indexFromItem(self.model.item(0,0))
         self.treeView.selectionModel().select(rootIndex, QtGui.QItemSelectionModel.Select)
 
-        self.setStyleSheet(
-        '''QWidget {
-
-            color: #e4e4e4;
-            background-color: #282828;
-            selection-background-color:#3d8ec9;
-            selection-color: black;
-            background-clip: border;
-            border-image: none;
-            outline: 0;
-        }'''
-        )
 
     def recursiveExpand(self, view, index, expand):
         
@@ -108,22 +93,18 @@ class Example(QtGui.QWidget):
             self.recursiveExpand(self.treeView, index, True)
 
 
-    def eventFilter(self, widget, event):
+    def eventFilter(self, obj, event):
 
-        if (event.type() == QtCore.QEvent.KeyPress and widget is self.treeView):
-            key = event.key()
-            if key == QtCore.Qt.Key_Shift:
+        if event.type() == QtCore.QEvent.KeyPress:
+            if event.key() == QtCore.Qt.Key_Shift:
                 self.shiftModifier = True
-            return False
 
-        elif (event.type() == QtCore.QEvent.KeyRelease and widget is self.treeView):
-            key = event.key()
-            if key == QtCore.Qt.Key_Shift:
+        elif event.type() == QtCore.QEvent.KeyRelease:
+            if event.key() == QtCore.Qt.Key_Shift:
                 self.shiftModifier = False
-            return False
 
-
-        return QtGui.QWidget.eventFilter(self, widget, event)
+        # standard event processing
+        return QtCore.QObject.eventFilter(self, obj, event)
 
 
     def selectMeshStartingFromRoot(self):
@@ -146,33 +127,27 @@ class Example(QtGui.QWidget):
 
         for node in diffSet:
             self.treeView.selectionModel().select(self.model.indexFromItem(node), QtGui.QItemSelectionModel.Select)
+    
+    def itemCheckBoxToggled(self, item, checkState):
+        model = item.model()
+        model.blockSignals(True)
+        self.recursiveCheckState(item, checkState)
+        model.blockSignals(False)
+        model.layoutChanged.emit()
 
-    def itemCheckBoxToggled(self, item, state):
-
-        if state == QtCore.Qt.CheckState.Unchecked:
-            self.setNodeEnabledState(item, False)
-
-        if state == QtCore.Qt.CheckState.Checked:
-            self.setNodeEnabledState(item, True)
 
     def dataChanged(self, topLeft, bottomRigh):
-        pass
+        print topLeft
 
-    def setNodeEnabledState(self, node, state):
+    def recursiveCheckState(self, item, checkState):
 
-        numRows = node.rowCount()
-
+        numRows = item.rowCount()
         if numRows > 0:
             for row in range(numRows):
-                child = node.child(row)
-                child.setEnabled(state)
-                if state:
-                    child.setCheckState(QtCore.Qt.CheckState.Checked)
-                else:
-                    child.setCheckState(QtCore.Qt.CheckState.Unchecked)
-
-                self.setNodeEnabledState(child, state)
-
+                child = item.child(row)
+                child.setEnabled(checkState == QtCore.Qt.CheckState.Checked)
+                child.setCheckState(checkState)
+                self.recursiveCheckState(child, checkState)
 
 
     def recurseTreeView(self, node, nodeSet, keepSet):
@@ -186,7 +161,7 @@ class Example(QtGui.QWidget):
         # leaf item
         if not node.hasChildren():
 
-            if node.data() == NodeType.MESH:
+            if node.data() == Outliner.MESH_NODE:
 
                 while True:
 
@@ -234,14 +209,13 @@ class Example(QtGui.QWidget):
         qItem.setCheckState(QtCore.Qt.CheckState.Checked)
 
         if xmlNode.tag == 'node':
-            qItem.setData(NodeType.TRANSFORM, UserRole.NODETYPE)
+            qItem.setData(Outliner.TRANSFORM_NODE, Outliner.NODETYPE_ROLE)
             qItem.setIcon(QtGui.QIcon('transform.png'))
-            #qItem.setIcon(self.createColorIcon(self.transformIconColor, 12, 12))
 
         elif xmlNode.tag == 'mesh':
-            qItem.setData(NodeType.MESH, UserRole.NODETYPE)
+            qItem.setData(Outliner.MESH_NODE, Outliner.NODETYPE_ROLE)
             qItem.setIcon(QtGui.QIcon('mesh.png'))
-            #qItem.setIcon(self.createColorIcon(self.meshIconColor, 12, 12))
+            
         else:
             qItem.setIcon(self.createColorIcon((0,0,0,1), 12, 12))
 
@@ -257,8 +231,12 @@ class Example(QtGui.QWidget):
 def main():
     
     app = QtGui.QApplication(sys.argv)
-    ex = Example()
-    ex.show() 
+
+    #style.compile_rc()
+    app.setStyleSheet(style.loadStyleSheet())
+
+    win = Outliner()
+    win.show() 
     sys.exit(app.exec_())
 
 
