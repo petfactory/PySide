@@ -33,6 +33,10 @@ class StandardItem(QtGui.QStandardItem):
                 self.model().checkBoxToggled.emit(self, state)
 
         super(StandardItem, self).setData(value, role)
+
+
+    def clone(self):
+        return StandardItem()
         
 class Outliner(QtGui.QWidget):
 
@@ -50,16 +54,16 @@ class Outliner(QtGui.QWidget):
         self.shiftModifier = False
 
         self.model = StandardItemModel()
+        self.model.setItemPrototype(StandardItem())
         self.model.checkBoxToggled.connect(self.itemCheckBoxToggled)
-        #self.model.checkBoxToggled.connect(self.recursiveCheckState)
-        
+                
         self.model.dataChanged.connect(self.dataChanged)
         vbox.addWidget(self.treeView)
         self.treeView.setModel(self.model)
         self.treeView.installEventFilter(self)
         self.treeView.expanded.connect(self.treeViewExpanded)
         self.treeView.collapsed.connect(self.treeViewCollapsed)
-
+        self.treeView.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
 
         cleanupDagButton = QtGui.QPushButton('DAG Cleanup')
         cleanupDagButton.clicked.connect(self.cleanupDagButtonClicked)
@@ -129,6 +133,7 @@ class Outliner(QtGui.QWidget):
             self.treeView.selectionModel().select(self.model.indexFromItem(node), QtGui.QItemSelectionModel.Select)
     
     def itemCheckBoxToggled(self, item, checkState):
+        print 'itemCheckBoxToggled'
         model = item.model()
         model.blockSignals(True)
         self.recursiveCheckState(item, checkState)
@@ -142,6 +147,7 @@ class Outliner(QtGui.QWidget):
     def recursiveCheckState(self, item, checkState):
 
         numRows = item.rowCount()
+        print 'numRows: {}'.format(numRows)
         if numRows > 0:
             for row in range(numRows):
                 child = item.child(row)
