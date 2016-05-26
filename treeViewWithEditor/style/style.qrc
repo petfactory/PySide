@@ -1,0 +1,21 @@
+<RCC>
+  <qresource prefix="petfactoryIcons">
+    <file>rc/branch-open.png</file>
+    <file>rc/branch-open-end.png</file>
+    <file>rc/branch-closed.png</file>
+    <file>rc/branch-closed-end.png</file>
+    <file>rc/branch-more.png</file>
+    <file>rc/branch-end.png</file>
+    <file>rc/vline.png</file>
+    <file>rc/arrow-up.png</file>
+    <file>rc/arrow-down.png</file>
+    <file>rc/checkbox-unchecked.png</file>
+    <file>rc/checkbox-checked.png</file>
+    <file>rc/splitter.png</file>
+    <file>rc/toolbar-vertical.png</file>
+    <file>rc/toolbar-horizontal.png</file>
+  </qresource>
+  <qresource prefix="petfactoryStyle">
+      <file>style.qss</file>
+  </qresource>
+</RCC>
