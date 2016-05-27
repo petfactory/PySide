@@ -108,7 +108,7 @@ class Outliner(QtGui.QWidget):
         vbox.addWidget(cleanupDagButton)
         self.populateModelFromXml(self.xmlPath)
         
-        self.treeView.expandAll()
+        #self.treeView.expandAll()
         #self.treeView.setExpanded(self.model.indexFromItem(self.model.item(0,0)), True)
         #self.selectMeshStartingFromRoot()
 
@@ -171,7 +171,6 @@ class Outliner(QtGui.QWidget):
             self.treeView.selectionModel().select(self.model.indexFromItem(node), QtGui.QItemSelectionModel.Select)
     
     def itemCheckBoxToggled(self, item, checkState):
-        print 'itemCheckBoxToggled'
         model = item.model()
         model.blockSignals(True)
         self.recursiveCheckState(item, checkState)
@@ -186,7 +185,6 @@ class Outliner(QtGui.QWidget):
     def recursiveCheckState(self, item, checkState):
 
         numRows = item.rowCount()
-        print 'numRows: {}'.format(numRows)
         if numRows > 0:
             for row in range(numRows):
                 child = item.child(row)
