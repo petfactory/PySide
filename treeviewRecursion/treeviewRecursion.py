@@ -3,23 +3,58 @@ from PySide import QtGui, QtCore
 import xml.etree.ElementTree as ET
 import style
 
+
+class TreeView(QtGui.QTreeView):
+
+    def __init__(self, *args, **kwargs):
+        super(TreeView, self).__init__(*args, **kwargs)
+        self.currentDragType = None
+
+    def mousePressEvent(self, e):
+        pos = e.pos()
+        index = self.indexAt(pos)
+        self.currentDragType = index.data(StandardItem.NODETYPE_ROLE)
+        super(TreeView, self).mousePressEvent(e)
+
+    def mouseReleaseEvent(self, e):
+        self.currentDragType = None
+        super(TreeView, self).mouseReleaseEvent(e)
+    
+    def dragMoveEvent(self, e):
+
+        pos = e.pos()
+        index = self.indexAt(pos)
+        destType = index.data(StandardItem.NODETYPE_ROLE)
+
+        # nothing can be dropped on a mesh node
+        if destType == StandardItem.MESH_NODE:
+            e.ignore()
+
+        # a mesh node can not be dropped on "empty space"
+        elif self.currentDragType == StandardItem.MESH_NODE and index.row() < 0:
+            e.ignore()
+
+        # everything else is ok
+        else:
+            super(TreeView, self).dragMoveEvent(e)
+        
 class StandardItemModel(QtGui.QStandardItemModel):
 
     checkBoxToggled = QtCore.Signal(QtGui.QStandardItem, QtCore.Qt.CheckState)
 
     def __init__(self, *args, **kwargs):
         super(StandardItemModel, self).__init__(*args, **kwargs)
-
     
 class StandardItem(QtGui.QStandardItem):
 
-    TRANSFORM_NODE = 0
-    MESH_NODE = 1
+    TRANSFORM_NODE = 'transform_node'
+    MESH_NODE = 'mesh_node'
 
     NODETYPE_ROLE = QtCore.Qt.UserRole + 1
 
     def __init__(self, *args, **kwargs):
         super(StandardItem, self).__init__(*args, **kwargs)
+
 
     def setData(self, value, role=QtCore.Qt.UserRole+1):
 
@@ -47,7 +82,7 @@ class Outliner(QtGui.QWidget):
         self.setWindowTitle('Outliner')
         self.xmlPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'nodes.xml')
         vbox = QtGui.QVBoxLayout(self)
-        self.treeView = QtGui.QTreeView()
+
         self.meshItemList = []
         self.meshIconColor = (1, .8, 0, 1.0)
         self.transformIconColor = (.95, .95, .95, 1.0)
@@ -58,6 +93,9 @@ class Outliner(QtGui.QWidget):
         self.model.checkBoxToggled.connect(self.itemCheckBoxToggled)
                 
         self.model.dataChanged.connect(self.dataChanged)
+
+        #self.treeView = QtGui.QTreeView()
+        self.treeView = TreeView()
         vbox.addWidget(self.treeView)
         self.treeView.setModel(self.model)
         self.treeView.installEventFilter(self)
@@ -70,7 +108,7 @@ class Outliner(QtGui.QWidget):
         vbox.addWidget(cleanupDagButton)
         self.populateModelFromXml(self.xmlPath)
         
-        #self.treeView.expandAll()
+        self.treeView.expandAll()
         #self.treeView.setExpanded(self.model.indexFromItem(self.model.item(0,0)), True)
         #self.selectMeshStartingFromRoot()
 
@@ -142,7 +180,8 @@ class Outliner(QtGui.QWidget):
 
 
     def dataChanged(self, topLeft, bottomRigh):
-        print topLeft
+        #print topLeft
+        pass
 
     def recursiveCheckState(self, item, checkState):
 
@@ -248,3 +287,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
