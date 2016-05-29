@@ -2,7 +2,11 @@
 
 # Resource object code
 #
+<<<<<<< HEAD
 # Created: Sun May 29 14:17:50 2016
+=======
+# Created: Sun May 29 14:14:10 2016
+>>>>>>> dropMultiple
 #      by: The Resource Compiler for PySide (Qt v4.8.7)
 #
 # WARNING! All changes made in this file will be lost!

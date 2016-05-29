@@ -11,9 +11,21 @@ class TreeView(QtGui.QTreeView):
         self.currentDragType = None
 
     def mousePressEvent(self, e):
+
         pos = e.pos()
         index = self.indexAt(pos)
-        self.currentDragType = index.data(StandardItem.NODETYPE_ROLE)
+
+        # if we have more than one selected index, check if some is a mesh nodetype
+        selectedIndex = self.selectionModel().selectedIndexes()
+        if len(selectedIndex) > 0:
+
+            for index in selectedIndex:
+                if index.data(StandardItem.NODETYPE_ROLE) == StandardItem.MESH_NODE:
+                    self.currentDragType = StandardItem.MESH_NODE
+                    break
+        else:
+            self.currentDragType = index.data(StandardItem.NODETYPE_ROLE)
+
         super(TreeView, self).mousePressEvent(e)
 
     def mouseReleaseEvent(self, e):
@@ -102,6 +114,7 @@ class Outliner(QtGui.QWidget):
         self.treeView.expanded.connect(self.treeViewExpanded)
         self.treeView.collapsed.connect(self.treeViewCollapsed)
         self.treeView.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.treeView.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
 
         cleanupDagButton = QtGui.QPushButton('DAG Cleanup')
         cleanupDagButton.clicked.connect(self.cleanupDagButtonClicked)
