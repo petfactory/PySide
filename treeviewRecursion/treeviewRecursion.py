@@ -15,6 +15,8 @@ class TreeView(QtGui.QTreeView):
         pos = e.pos()
         index = self.indexAt(pos)
 
+        self.currentDragType = index.data(StandardItem.NODETYPE_ROLE)
+        
         # if we have more than one selected index, check if some is a mesh nodetype
         selectedIndex = self.selectionModel().selectedIndexes()
         if len(selectedIndex) > 0:
@@ -28,9 +30,9 @@ class TreeView(QtGui.QTreeView):
 
         super(TreeView, self).mousePressEvent(e)
 
-    def mouseReleaseEvent(self, e):
-        self.currentDragType = None
-        super(TreeView, self).mouseReleaseEvent(e)
+    #def mouseReleaseEvent(self, e):
+    #    self.currentDragType = None
+    #    super(TreeView, self).mouseReleaseEvent(e)
     
     def dragMoveEvent(self, e):
 
