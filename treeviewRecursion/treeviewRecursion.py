@@ -288,7 +288,7 @@ def main():
     
     app = QtGui.QApplication(sys.argv)
 
-    style.compile_rc()
+    #style.compile_rc()
     app.setStyleSheet(style.loadStyleSheet())
 
     win = Outliner()
