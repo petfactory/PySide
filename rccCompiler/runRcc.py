@@ -11,6 +11,9 @@ define your path structure by hand (as opposed to xml structure):
 They are "flat", they do not use the hierarchy of the xml like nodes.
 '''
 
+qrcDestDir = r'/Users/johan/Dev/pyside/rccCompiler/icons'
+qrcFilePath = r'/Users/johan/Dev/pyside/rccCompiler/icons/icons.qrc'
+compiledQrcPath = r'/Users/johan/Dev/pyside/rccCompiler/icons.py'
 
 def recurseFlatDir(dir, xmlParent, parentList=None):
 
@@ -101,14 +104,13 @@ class TestWin(QtGui.QWidget):
         self.listView.setAlternatingRowColors(True)
         self.listView.setModel(self.model)
         splitter.addWidget(self.listView)
-        #self.populateListView(self.model, [':/apa', ':/write', ':/sub1/switch.png', ':/sub1/sub2/read.png'])
 
         self.textEdit = QtGui.QTextEdit()
         splitter.addWidget(self.textEdit)
 
-        self.populateListViewFromQrc('/Users/johan/Desktop/pysideRcc/icons/icons.qrc', self.model)
+        self.populateListViewFromQrc(qrcFilePath, self.model)
 
-        self.populateTextEditFromQrc('/Users/johan/Desktop/pysideRcc/icons/icons.qrc', self.textEdit)
+        self.populateTextEditFromQrc(qrcFilePath, self.textEdit)
 
     def populateTextEditFromQrc(self, path, textEdit):
         
@@ -137,25 +139,16 @@ class TestWin(QtGui.QWidget):
 
                 self.createIconsFromQrc(xmlChild, model)
 
-
     def populateListViewFromQrc(self, qrcPath, model):
         tree = ET.parse(qrcPath)
         root = tree.getroot()
         self.createIconsFromQrc(root, model)
-            
-    def populateListView(self, model, imageNameList):
-        #print imageNameList
-
-        for imageName in imageNameList:
-            item = QtGui.QStandardItem(imageName)
-            item.setFlags(QtCore.Qt.ItemIsEnabled)
-            item.setIcon(QtGui.QIcon(QtGui.QPixmap(imageName)))
-            model.appendRow(item)
-         
+                     
 def main():
      
-    buildQrc('/Users/johan/Desktop/pysideRcc/icons', 'icons')
-    compileResource('/Users/johan/Desktop/pysideRcc/icons/icons.qrc', 'icons.py')
+    buildQrc(qrcDestDir, 'icons')
+ 
+    compileResource(qrcFilePath, 'icons.py')
 
     importSuccess = False
     try:
