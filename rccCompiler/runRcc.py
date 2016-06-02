@@ -11,9 +11,9 @@ define your path structure by hand (as opposed to xml structure):
 They are "flat", they do not use the hierarchy of the xml like nodes.
 '''
 
-qrcDestDir = r'/Users/johan/Dev/pyside/rccCompiler/icons'
-qrcFilePath = r'/Users/johan/Dev/pyside/rccCompiler/icons/icons.qrc'
-compiledQrcPath = r'/Users/johan/Dev/pyside/rccCompiler/icons.py'
+assetsDir = r'/Users/johan/Dev/pyside/rccCompiler/icons'
+qrcFileName = 'icons'
+outFilePath = r'/Users/johan/Dev/pyside/rccCompiler/icons.py'
 
 def recurseFlatDir(dir, xmlParent, parentList=None):
 
@@ -46,45 +46,46 @@ def recurseFlatDir(dir, xmlParent, parentList=None):
 
 
 
-def buildQrc(sourceDir, destFileName):
+def buildQrc(assetsDir, qrcFileName):
 
-    if not os.path.isdir(sourceDir):
-        print 'The source directory is not valid'
+    if not os.path.isdir(assetsDir):
+        print 'The assets directory is not valid'
         return
 
-    destFilePath = os.path.join(sourceDir, '{}.qrc'.format(destFileName))
+    qrcFilePath = os.path.join(assetsDir, '{}.qrc'.format(qrcFileName))
 
-    if os.path.isfile(destFilePath):
+    if os.path.isfile(qrcFilePath):
         print 'The file; {} exists, overwrite...'
 
     rccElem = ET.Element('RCC')
     qresourceElem = ET.Element('qresource')
     rccElem.append(qresourceElem)
 
-    recurseFlatDir(sourceDir, qresourceElem)
+    recurseFlatDir(assetsDir, qresourceElem)
     
-
+    # use ElementTree to build the xml like structure
+    # use minidom to prettyfy it
     xmlString = ET.tostring(rccElem)
     miniDomXml = xml.dom.minidom.parseString(xmlString)
     prettyXML = miniDomXml.toprettyxml(indent='    ')
 
-    sansfirstline = '\n'.join(prettyXML.split('\n')[1:]) 
-    print sansfirstline
+    # use ugly hack to remove the description
+    skipfirstline = '\n'.join(prettyXML.split('\n')[1:]) 
+    #print sansfirstline
 
-    if(destFilePath):
-        f = open(destFilePath,'w')
-        f.write(sansfirstline)
+    if qrcFilePath:
+        f = open(qrcFilePath,'w')
+        f.write(skipfirstline)
         f.close()
-    
+        
 
-def compileResource(inputQrc, outFile):
+def compileResourceToPython(inputQrc, outFilePath):
 
     dirPath = os.path.dirname(__file__)
     rccPath = os.path.join(dirPath, 'pyside-rcc')
-    outFile = os.path.join(dirPath, outFile)
-    inputQrc = os.path.join(dirPath, inputQrc)
 
-    subprocess.call([rccPath, inputQrc, '-o', outFile])
+    qrcFilePath = os.path.join(assetsDir, '{}.qrc'.format(qrcFileName))
+    subprocess.call([rccPath, qrcFilePath, '-o', outFilePath])
 
 
 class TestWin(QtGui.QWidget):
@@ -108,8 +109,8 @@ class TestWin(QtGui.QWidget):
         self.textEdit = QtGui.QTextEdit()
         splitter.addWidget(self.textEdit)
 
+    def addData(self, qrcFilePath):
         self.populateListViewFromQrc(qrcFilePath, self.model)
-
         self.populateTextEditFromQrc(qrcFilePath, self.textEdit)
 
     def populateTextEditFromQrc(self, path, textEdit):
@@ -143,17 +144,21 @@ class TestWin(QtGui.QWidget):
         tree = ET.parse(qrcPath)
         root = tree.getroot()
         self.createIconsFromQrc(root, model)
-                     
+
+
 def main():
      
-    buildQrc(qrcDestDir, 'icons')
- 
-    compileResource(qrcFilePath, 'icons.py')
+    qrcFilePath = os.path.join(assetsDir, '{}.qrc'.format(qrcFileName))
+
+    buildQrc(assetsDir, qrcFileName)
+    
+    compileResourceToPython(qrcFilePath, outFilePath)
 
     importSuccess = False
     try:
         import icons
         importSuccess = True
+
     except ImportError:
         print 'could not import icons.py'
     
@@ -161,9 +166,9 @@ def main():
     
         app = QtGui.QApplication(sys.argv)
         win = TestWin()
+        win.addData(qrcFilePath)
         win.show()
         sys.exit(app.exec_())
-
 
 if __name__ == '__main__':
     main()
