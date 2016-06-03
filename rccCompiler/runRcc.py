@@ -42,7 +42,7 @@ def recurseFlatDir(dir, xmlParent, parentList=None):
 
 
 
-def buildQrc(assetsDir, qrcFileName):
+def buildQrc(assetsDir, qrcFileName, prefix):
 
     if not os.path.isdir(assetsDir):
         print 'The assets directory is not valid'
@@ -55,6 +55,8 @@ def buildQrc(assetsDir, qrcFileName):
 
     rccElem = ET.Element('RCC')
     qresourceElem = ET.Element('qresource')
+    qresourceElem.set('prefix', prefix)
+
     rccElem.append(qresourceElem)
 
     recurseFlatDir(assetsDir, qresourceElem)
@@ -91,6 +93,7 @@ class TestWin(QtGui.QWidget):
         self.setGeometry(10, 50, 500, 400)
         self.setWindowTitle('Test RCC Win')
 
+        self.prefix = None
         self.qrcFileName = 'icons'
         self.qrcFilePath = '{}.qrc'.format(self.qrcFileName)
 
@@ -110,17 +113,25 @@ class TestWin(QtGui.QWidget):
         self.textEdit = QtGui.QTextEdit()
         splitter.addWidget(self.textEdit)
 
+        self.prefixLineEdit = QtGui.QLineEdit()
+        vbox.addWidget(self.prefixLineEdit)
+
         openAssetButton = QtGui.QPushButton('Open Asset Dir')
         openAssetButton.clicked.connect(self.openAssetButtonClicked)
         vbox.addWidget(openAssetButton)
 
     def openAssetButtonClicked(self):
 
+        self.prefix = self.prefixLineEdit.text()
+        if self.prefix == '':
+            print 'Please enter a prefix'
+            return
+            
         assetDir = QtGui.QFileDialog.getExistingDirectory(None, 'Open Assets', None, QtGui.QFileDialog.ShowDirsOnly)
 
         if assetDir:
             
-            buildQrc(assetDir, self.qrcFileName)
+            buildQrc(assetDir, self.qrcFileName, self.prefix)
 
             qrcFilePath = os.path.join(assetDir, self.qrcFilePath)
             self.populateTextEditFromQrc(qrcFilePath, self.textEdit)
@@ -160,9 +171,10 @@ class TestWin(QtGui.QWidget):
 
         if xmlNode.tag == 'file':
             
-            item = QtGui.QStandardItem(xmlNode.text)
+            text = ':/{}/{}'.format(self.prefix, xmlNode.text)
+            item = QtGui.QStandardItem(text)
             item.setFlags(QtCore.Qt.ItemIsEnabled)
-            item.setIcon(QtGui.QIcon(QtGui.QPixmap(':/{}'.format(xmlNode.text))))
+            item.setIcon(QtGui.QIcon(QtGui.QPixmap(text)))
             model.appendRow(item)
 
         xmlChildren = xmlNode.getchildren()
