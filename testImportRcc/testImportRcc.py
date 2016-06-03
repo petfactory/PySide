@@ -24,6 +24,9 @@ def recurseRcc(qDir, assetList):
 def getPathsFromResource():
 
     rc = QtCore.QResource()
+
+    # children() -> Returns a list of all resources in this directory,
+    # if the resource represents a file the list will be empty.
     rootResourceList = rc.children()
 
     retDict = {}
