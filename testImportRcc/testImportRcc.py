@@ -29,6 +29,8 @@ def getPathsFromResource():
     # if the resource represents a file the list will be empty.
     rootResourceList = rc.children()
 
+    print rootResourceList
+
     retDict = {}
     for prefix in rootResourceList:
         #print prefix
@@ -56,7 +58,7 @@ class TestWin(QtGui.QWidget):
         vbox.addWidget(self.tabWidget)
 
         self.resourceDict = getPathsFromResource()
-        pprint.pprint(self.resourceDict)
+        #pprint.pprint(self.resourceDict)
 
         self.addWidgetFromDict(self.resourceDict, self.tabWidget)
 
