@@ -11,10 +11,6 @@ define your path structure by hand (as opposed to xml structure):
 They are "flat", they do not use the hierarchy of the xml like nodes.
 '''
 
-assetsDir = r'/Users/johan/Dev/pyside/rccCompiler/icons'
-qrcFileName = 'icons'
-outFilePath = r'/Users/johan/Dev/pyside/rccCompiler/icons.py'
-
 def recurseFlatDir(dir, xmlParent, parentList=None):
 
     if parentList is None:
@@ -79,12 +75,11 @@ def buildQrc(assetsDir, qrcFileName):
         f.close()
         
 
-def compileResourceToPython(inputQrc, outFilePath):
+def compileResourceToPython(qrcFilePath, outFilePath):
 
     dirPath = os.path.dirname(__file__)
     rccPath = os.path.join(dirPath, 'pyside-rcc')
 
-    qrcFilePath = os.path.join(assetsDir, '{}.qrc'.format(qrcFileName))
     subprocess.call([rccPath, qrcFilePath, '-o', outFilePath])
 
 
@@ -95,6 +90,12 @@ class TestWin(QtGui.QWidget):
         
         self.setGeometry(10, 50, 500, 400)
         self.setWindowTitle('Test RCC Win')
+
+        self.qrcFileName = 'icons'
+        self.qrcFilePath = '{}.qrc'.format(self.qrcFileName)
+
+        self.compiledPythonFileName = 'icons'
+        self.compiledPythonFilePath = '{}.py'.format(self.compiledPythonFileName)
 
         vbox = QtGui.QVBoxLayout(self)
         splitter = QtGui.QSplitter()
@@ -109,9 +110,41 @@ class TestWin(QtGui.QWidget):
         self.textEdit = QtGui.QTextEdit()
         splitter.addWidget(self.textEdit)
 
-    def addData(self, qrcFilePath):
-        self.populateListViewFromQrc(qrcFilePath, self.model)
-        self.populateTextEditFromQrc(qrcFilePath, self.textEdit)
+        openAssetButton = QtGui.QPushButton('Open Asset Dir')
+        openAssetButton.clicked.connect(self.openAssetButtonClicked)
+        vbox.addWidget(openAssetButton)
+
+    def openAssetButtonClicked(self):
+
+        assetDir = QtGui.QFileDialog.getExistingDirectory(None, 'Open Assets', None, QtGui.QFileDialog.ShowDirsOnly)
+
+        if assetDir:
+            
+            buildQrc(assetDir, self.qrcFileName)
+
+            qrcFilePath = os.path.join(assetDir, self.qrcFilePath)
+            self.populateTextEditFromQrc(qrcFilePath, self.textEdit)
+
+            fileName, selectedFilter = QtGui.QFileDialog.getSaveFileName(None, 'Save assets', None, 'Python (*.py)')
+            
+            if fileName:
+                print os.path.join(os.path.dirname(__file__), self.qrcFilePath)
+
+                compileResourceToPython(qrcFilePath, os.path.join(os.path.dirname(__file__),self.compiledPythonFilePath))
+                compileResourceToPython(qrcFilePath, fileName)  
+
+                importSuccess = False
+                try:
+                    import icons
+                    importSuccess = True
+
+                except ImportError:
+                    print 'could not import icons.py'
+                
+                if importSuccess:
+                    self.populateListViewFromQrc(qrcFilePath, self.model)
+
+
 
     def populateTextEditFromQrc(self, path, textEdit):
         
@@ -148,27 +181,10 @@ class TestWin(QtGui.QWidget):
 
 def main():
      
-    qrcFilePath = os.path.join(assetsDir, '{}.qrc'.format(qrcFileName))
-
-    buildQrc(assetsDir, qrcFileName)
-    
-    compileResourceToPython(qrcFilePath, outFilePath)
-
-    importSuccess = False
-    try:
-        import icons
-        importSuccess = True
-
-    except ImportError:
-        print 'could not import icons.py'
-    
-    if importSuccess:
-    
-        app = QtGui.QApplication(sys.argv)
-        win = TestWin()
-        win.addData(qrcFilePath)
-        win.show()
-        sys.exit(app.exec_())
+    app = QtGui.QApplication(sys.argv)
+    win = TestWin()
+    win.show()
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
     main()
