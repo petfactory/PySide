@@ -1,16 +1,7 @@
 from PySide import QtGui, QtCore
-import mario
-import icons
 import sys, os
 import pprint
-reload(mario)
-
-'''
->>> moduleNames = ['sys', 'os', 're', 'unittest'] 
->>> moduleNames
-['sys', 'os', 're', 'unittest']
->>> modules = map(__import__, moduleNames)
-'''
+import importlib
 
 
 def recurseRcc(qDir, assetList):
@@ -29,30 +20,8 @@ def recurseRcc(qDir, assetList):
         d = QtCore.QDir(dName)
         recurseRcc(d, assetList)
 
-def getPathsFromResource():
 
-    rc = QtCore.QResource()
-
-    # children() -> Returns a list of all resources in this directory,
-    # if the resource represents a file the list will be empty.
-    rootResourceList = rc.children()
-
-    print rootResourceList
-
-    retDict = {}
-    for prefix in rootResourceList:
-        #print prefix
-        qDir = QtCore.QDir(':{}'.format(prefix))
-        assetList = []
-        retDict[prefix] = assetList
-        recurseRcc(qDir, assetList)
-
-    #pprint.pprint(retDict)
-    return retDict
-
-
-
-class TestWin(QtGui.QWidget):
+class TestWin(QtGui.QMainWindow):
     
     def __init__(self):
         super(TestWin, self).__init__()
@@ -62,29 +31,53 @@ class TestWin(QtGui.QWidget):
 
         self.listViewList = []
 
+        mainWidget = QtGui.QWidget()
+        self.setCentralWidget(mainWidget)
+        vbox = QtGui.QVBoxLayout(mainWidget)
 
-        vbox = QtGui.QVBoxLayout(self)
+        openResourceAction = QtGui.QAction('Open', self)
+        openResourceAction.setShortcut('Ctrl+O')
+        openResourceAction.triggered.connect(self.importResourceTriggered)
+
+        saveIconAction = QtGui.QAction('Save', self)
+        saveIconAction.setShortcut('Ctrl+S')
+        saveIconAction.triggered.connect(self.saveIconTriggered)
+        
+        self.toolbar = self.addToolBar('fileToolbar')
+        self.toolbar.addAction(openResourceAction)
+        self.toolbar.addAction(saveIconAction)
 
         self.tabWidget = QtGui.QTabWidget()
         vbox.addWidget(self.tabWidget)
 
-        self.resourceDict = getPathsFromResource()
-        #pprint.pprint(self.resourceDict)
 
-        self.addWidgetFromDict(self.resourceDict, self.tabWidget)
+    def importResourceTriggered(self):
+        fileName, selectedFilter = QtGui.QFileDialog.getOpenFileName(None, 'Import Resource', None, 'Python (*.py)')
 
-        saveIconButton = QtGui.QPushButton('Save Icon')
-        saveIconButton.clicked.connect(self.saveIconButtonClicked)
-        vbox.addWidget(saveIconButton)
+        if fileName:
 
+            baseName = os.path.basename(fileName)
+            moduleName, ext = os.path.splitext(baseName)
+            importlib.import_module(moduleName)
 
-    def saveIconButtonClicked(self):
+            self.resourceDict = self.getPathsFromResource()
+            #pprint.pprint(self.resourceDict)
+
+            self.addWidgetFromDict(self.resourceDict, self.tabWidget)
+
+    def saveIconTriggered(self):
+
         index = self.tabWidget.currentIndex()
+        if index == -1:
+            print 'Please open a resource and select an icon to save'
+            return
+
         listView = self.listViewList[index]
         selectionModel = listView.selectionModel()
         selectedQIndexes = selectionModel.selectedIndexes()
 
-        if len(selectedQIndexes) < 0:
+        if len(selectedQIndexes) == 0:
+            print 'Please slect an icon'
             return
 
         saveDir = QtGui.QFileDialog.getExistingDirectory(None, 'Select Directory to save icons')
@@ -111,12 +104,42 @@ class TestWin(QtGui.QWidget):
         #if fileName:
         #    pass
 
+    def getPathsFromResource(self):
+
+        rc = QtCore.QResource()
+
+        # children() -> Returns a list of all resources in this directory,
+        # if the resource represents a file the list will be empty.
+        rootResourceList = rc.children()
+
+        #print rootResourceList
+
+        retDict = {}
+        for prefix in rootResourceList:
+
+            #print prefix
+            qDir = QtCore.QDir(':{}'.format(prefix))
+            assetList = []
+            retDict[prefix] = assetList
+            recurseRcc(qDir, assetList)
+
+        #pprint.pprint(retDict)
+        return retDict
+
 
     def addWidgetFromDict(self, resourceDict, tabWidget):
 
         keyList = resourceDict.keys()
 
+        currentTabNaneList = []
+        for index in range(self.tabWidget.count()):
+            currentTabNaneList.append(self.tabWidget.tabText(index))
+
         for key in keyList:
+
+            if key in currentTabNaneList:
+                print 'tab exists, skipping...'
+                continue
 
             tab = QtGui.QWidget()
             tabWidget.addTab(tab, key)  
@@ -132,9 +155,6 @@ class TestWin(QtGui.QWidget):
 
             for assetPath in assetPathList:
                 self.populateListView(assetPath, model)
-
-            #sm = listView.selectionModel()
-            #sm.selectionChanged.connect(self.listViewSelectionChanged)
 
     def listViewSelectionChanged(self, newSelection, oldSelection):
     	print newSelection.indexes()
