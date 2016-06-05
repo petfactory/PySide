@@ -1,9 +1,17 @@
 from PySide import QtGui, QtCore
 import mario
 import icons
-import sys
+import sys, os
 import pprint
 reload(mario)
+
+'''
+>>> moduleNames = ['sys', 'os', 're', 'unittest'] 
+>>> moduleNames
+['sys', 'os', 're', 'unittest']
+>>> modules = map(__import__, moduleNames)
+'''
+
 
 def recurseRcc(qDir, assetList):
 
@@ -49,8 +57,11 @@ class TestWin(QtGui.QWidget):
     def __init__(self):
         super(TestWin, self).__init__()
         
-        self.setGeometry(10, 10, 20, 20)
+        self.setGeometry(10, 10, 400, 600)
         self.setWindowTitle('Test RCC Win')
+
+        self.listViewList = []
+
 
         vbox = QtGui.QVBoxLayout(self)
 
@@ -61,6 +72,45 @@ class TestWin(QtGui.QWidget):
         #pprint.pprint(self.resourceDict)
 
         self.addWidgetFromDict(self.resourceDict, self.tabWidget)
+
+        saveIconButton = QtGui.QPushButton('Save Icon')
+        saveIconButton.clicked.connect(self.saveIconButtonClicked)
+        vbox.addWidget(saveIconButton)
+
+
+    def saveIconButtonClicked(self):
+        index = self.tabWidget.currentIndex()
+        listView = self.listViewList[index]
+        selectionModel = listView.selectionModel()
+        selectedQIndexes = selectionModel.selectedIndexes()
+
+        if len(selectedQIndexes) < 0:
+            return
+
+        saveDir = QtGui.QFileDialog.getExistingDirectory(None, 'Select Directory to save icons')
+        
+        if saveDir:
+
+            for qIndex in selectedQIndexes:
+
+                baseName = os.path.basename(qIndex.data())
+                savePath = os.path.join(saveDir, baseName)
+
+                #print savePath
+                if os.path.isfile(savePath):
+                    print 'file exists'
+                    return
+
+                qIcon = qIndex.data(QtCore.Qt.DecorationRole)
+                availSizeList =  qIcon.availableSizes()
+                pixmap = qIcon.pixmap(availSizeList[0])
+                pixmap.save(savePath)
+
+        #return
+        #fileName, selectedFilter = QtGui.QFileDialog.getSaveFileName(None, 'Save pixmap', baseName, 'PNG (*.png)')
+        #if fileName:
+        #    pass
+
 
     def addWidgetFromDict(self, resourceDict, tabWidget):
 
@@ -73,7 +123,8 @@ class TestWin(QtGui.QWidget):
             tabVbox = QtGui.QVBoxLayout(tab)
             model = QtGui.QStandardItemModel()
             listView = QtGui.QListView()
-
+            listView.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+            self.listViewList.append(listView)
             listView.setAlternatingRowColors(True)
             listView.setModel(model)
             tabVbox.addWidget(listView)
@@ -82,11 +133,11 @@ class TestWin(QtGui.QWidget):
             for assetPath in assetPathList:
                 self.populateListView(assetPath, model)
 
-            sm = listView.selectionModel()
-            sm.selectionChanged.connect(self.listViewSelectionChanged)
+            #sm = listView.selectionModel()
+            #sm.selectionChanged.connect(self.listViewSelectionChanged)
 
-    def listViewSelectionChanged(self, a):
-    	print a
+    def listViewSelectionChanged(self, newSelection, oldSelection):
+    	print newSelection.indexes()
 
     def populateListView(self, assetPath, model):
 
