@@ -73,19 +73,25 @@ class TestWin(QtGui.QWidget):
             tabVbox = QtGui.QVBoxLayout(tab)
             model = QtGui.QStandardItemModel()
             listView = QtGui.QListView()
+
             listView.setAlternatingRowColors(True)
             listView.setModel(model)
             tabVbox.addWidget(listView)
-
             assetPathList = resourceDict.get(key)
 
             for assetPath in assetPathList:
                 self.populateListView(assetPath, model)
 
+            sm = listView.selectionModel()
+            sm.selectionChanged.connect(self.listViewSelectionChanged)
+
+    def listViewSelectionChanged(self, a):
+    	print a
+
     def populateListView(self, assetPath, model):
 
         item = QtGui.QStandardItem(assetPath)
-        item.setFlags(QtCore.Qt.ItemIsEnabled)
+        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setIcon(QtGui.QIcon(QtGui.QPixmap(assetPath)))
         model.appendRow(item)
 
