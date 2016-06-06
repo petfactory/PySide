@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys, os
 import subprocess
 from PySide import QtGui, QtCore
@@ -10,6 +12,17 @@ Paths in Qt resource files are artificial constructs, therefore you need to expl
 define your path structure by hand (as opposed to xml structure):
 They are "flat", they do not use the hierarchy of the xml like nodes.
 '''
+
+
+def resourcePath(relativePath):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        basePath = sys._MEIPASS
+    except Exception:
+        basePath = os.path.abspath(".")
+
+    return os.path.join(basePath, relativePath)
 
 def recurseFlatDir(dir, xmlParent, parentList=None):
 
@@ -79,9 +92,8 @@ def buildQrc(assetsDir, qrcFileName, prefix):
 
 def compileResourceToPython(qrcFilePath, outFilePath):
 
-    dirPath = os.path.dirname(__file__)
+    dirPath = resourcePath(os.path.dirname(__file__))
     rccPath = os.path.join(dirPath, 'pyside-rcc')
-
     subprocess.call([rccPath, qrcFilePath, '-o', outFilePath])
 
 
@@ -139,9 +151,9 @@ class TestWin(QtGui.QWidget):
             fileName, selectedFilter = QtGui.QFileDialog.getSaveFileName(None, 'Save assets', None, 'Python (*.py)')
             
             if fileName:
-                print os.path.join(os.path.dirname(__file__), self.qrcFilePath)
-
-                compileResourceToPython(qrcFilePath, os.path.join(os.path.dirname(__file__),self.compiledPythonFilePath))
+                #print os.path.join(os.path.dirname(__file__), self.qrcFilePath)
+                print resourcePath(os.path.dirname(__file__))
+                compileResourceToPython(qrcFilePath, resourcePath(os.path.join(os.path.dirname(__file__),self.compiledPythonFilePath)))
                 compileResourceToPython(qrcFilePath, fileName)  
 
                 importSuccess = False
