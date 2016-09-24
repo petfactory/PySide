@@ -43,25 +43,33 @@ class BaseWin(QtGui.QWidget):
         self.uiVbox.setContentsMargins(6, 6, 6, 6)
 
         self.origoLabel, self.origoSpinbox, self.origoGraphic = self.addSpinBox('Origo', 'arrow.png', (0, 0))
-        self.camDistLabel, self.camDistSpinbox, self.camDistGraphic = self.addSpinBox('Camera dist', 'arrow.png', (0, 0))
+        self.heightOffsetLabel, self.heightOffsetSpinbox, self.heightOffsetGraphic = self.addSpinBox('Height Offset', 'arrow.png', (50, 20))
         self.camPitchLabel, self.camPitchSpinbox, self.camPitchGraphic  = self.addSpinBox('Camera pitch', 'arrow.png', (0, 50))
         self.camJawLabel, self.camJawSpinbox, self.camJawGraphic  = self.addSpinBox('Camera jaw', 'arrow.png', (0, 100))
+        self.camDistLabel, self.camDistSpinbox, self.camDistGraphic = self.addSpinBox('Camera dist', 'arrow.png', (0, 0))
         self.focallength, self.focallengthSpinbox, self.focallengthGraphic  = self.addSpinBox('Focallength', 'arrow.png', (0, 150))
 
-        #self.useExistingCamCB = QtGui.QCheckBox('Use Existing Camera')
+        self.camDistSpinbox.setValue(1000)
+        self.focallengthSpinbox.setValue(35)
+
         self.useExistingCamGroup = QtGui.QGroupBox('Use Existing Camera')
         self.useExistingCamGroup.setLayout(QtGui.QVBoxLayout())
         self.existingCameraName = QtGui.QLineEdit()
         self.useExistingCamGroup.layout().addWidget(self.existingCameraName)
+        self.useCurrentFocallength = QtGui.QCheckBox('Use Current Focallength')
+        self.useExistingCamGroup.layout().addWidget(self.useCurrentFocallength)
         self.useExistingCamGroup.setCheckable(True)
-        self.uiVbox.addWidget(self.useExistingCamGroup )
+        self.useExistingCamGroup.setChecked(False)
+        self.uiVbox.addWidget(self.useExistingCamGroup)
 
         self.changeFocallengthGroup = QtGui.QGroupBox('Change Focallength')
         self.changeFocallengthGroup.setLayout(QtGui.QVBoxLayout())
         self.newFocallengthSpinbox = QtGui.QDoubleSpinBox()
+        self.newFocallengthSpinbox.setValue(70)
         self.changeFocallengthGroup.layout().addWidget(self.newFocallengthSpinbox)
         self.changeFocallengthGroup.setCheckable(True)
-        self.uiVbox.addWidget(self.changeFocallengthGroup )
+        self.changeFocallengthGroup.setChecked(False)
+        self.uiVbox.addWidget(self.changeFocallengthGroup)
 
         createAnimCB = QtGui.QCheckBox('Animate Turntable')
         self.uiVbox.addWidget(createAnimCB)
@@ -78,12 +86,14 @@ class BaseWin(QtGui.QWidget):
         self.uiVbox.addLayout(hbox)
 
         label = QtGui.QLabel(name)
-        label.setFixedWidth(80)
+        label.setFixedWidth(100)
+        label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         label.installEventFilter(self)
         label.setMouseTracking(True)
         hbox.addWidget(label)
 
         spinbox = QtGui.QDoubleSpinBox()
+        spinbox.setRange(-99999, 99999)
         hbox.addWidget(spinbox)
 
         graphic = QtGui.QGraphicsPixmapItem(QtGui.QPixmap(graphicName))
